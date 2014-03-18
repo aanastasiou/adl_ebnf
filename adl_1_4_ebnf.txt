@@ -1,0 +1,341 @@
+/*ADL 1.5 expressed in EBNF by reverse engineering the OSHIP ADL 1.4 
+parser based on pyparsing 
+
+By Athanasios Anastasiou based on original work, part of the OSHIP 
+openEHR reference implementation in Python available from:
+http://bazaar.launchpad.net/~higorpinto/oship/cr-ehr/view/head:/oship/src/oship/openehr/adl_1_4.py
+and originally authored by Tim Cook and Paul McGuire.
+
+The objective of this piece of work is to arrive at a generic definition
+of ADL 1.5 in EBNF which can be used for a number of purposes such as 
+syntax diagrams, editor highlighting scripts, data validation and more.
+
+This is still work in progress with the following rough TODO list:
+
+*) The definitions are already complex enough and several shortcuts have 
+been used to make strings shorter. These shortcuts come in the form of 
+generic lambda functions.
+
+*) Certain classes need careful revision of their definitions, these are
+(regex, quotedString, uri, real)
+
+*) Even at the level of EBNF it is possible to perform some
+optimisations. However at this point it is best to express everything 
+as simply as possible to first conclude with clear definitions for all
+classes.
+*/
+
+
+/*Definition of some functions to make definitions easier
+TODO, HIGH: These functions should be expanded at some point for a valid EBNF document
+*/
+
+defineList = lambda cl,delim:'%s(%s%s)*' % (cl,delim,cl)
+defineQuoted = lambda cl,quote:'%s%s%s' % (quote,cl,quote)
+make_interval = lambda expr : \
+    Group("|" + ( expr("min") + ".." + expr("max") |
+        ">" + expr("min") + ".." + expr("max") |
+        expr("min") + ".." + "<" + expr("max") |
+        ">" + expr("min") + ".." + "<" + expr("max") |
+        "<=" + expr |
+        "<" + expr |
+        ">=" + expr |
+        ">" + expr |
+        expr ) + "|" )
+
+
+#Definition of key literals
+GE::='>='
+LE::='<='
+NEQ::='!='
+LT::='<'
+GT::='>'
+EQ::='='
+LPAR::='('
+RPAR::=')'
+LBRK::='['
+RBRK::=']'
+BAR::='|'
+QUOT::='\''
+SEMI::=';'
+LBRC::='{'
+RBRC::='}'
+STAR::='*'
+COLON::=':'
+COMMA::=','
+ELLIPSIS::='...'
+
+/*cADL*/
+MATCHES::='matches'|'MATCHES'
+IS_IN::='is_in'|'IS_IN'
+OCCURRENCES::='occurences'|'OCCURENCES'
+EXISTENCE::='existence'|'EXISTENCE'
+CARDINALITY::='cardinality'|'CARDINALITY'
+ORDERED::='ordered'|'ORDERED'
+UNORDERED::=='unordered'|'UNORDERED'
+UNIQUE::='unique'|'UNIQUE'
+INFINITY::='infinity'|'INFINITY'
+USE_NODE::='use_node'|'USE_NODE'
+USE_ARCHETYPE::='use_archetype'|'USE_ARCHETYPE'
+ALLOW_ARCHETYPE::='allow_archetype'|'ALLOW_ARCHETYPE'
+THEN::='then'|'THEN'
+ELSE::='else'|'ELSE'
+AND::='and'|'AND'
+OR::='or'|'OR'
+XOR::='xor'|'XOR'
+NOT::='not'|'NOT'
+IMPLIES::='implies'|'IMPLIES'
+EXISTS::='exists'|'EXISTS'
+TRUE::='true'|'TRUE'
+FALSE::='false'|'FALSE'
+FORALL::='forall'|'FORALL' /*Why not for_all?*/
+INCLUDE::='include'|'INCLUDE'
+EXCLUDE::='exclude'|'EXCLUDE'
+
+/*Archetype section names*/
+ARCHETYPE::='archetype'|'ARCHETYPE'
+CONCEPT::='concept'|'CONCEPT'
+LANGUAGE::='language'|'LANGUAGE'
+DESCRIPTION::='description'|'DESCRIPTION'
+DEFINITION::='definition'|'DEFINITION'
+INVARIANT::='invariant'|'INVARIANT'
+ONTOLOGY::='ontology'|'ONTOLOGY'
+REVISION_HISTORY::='revision_history'
+SPECIALIZE::= 'specialize'|'specialise'|'SPECIALISE'|'SPECIALIZE'
+
+
+/*Elementary definitions (some of which are not necessary)*/
+uppers::=[A-Z]
+lowers::=[a-z]
+idchars::=[a-zA-Z_]
+
+v_type_identifier::=[A-Z][a-zA-Z_]*
+v_generic_type_identifier::=[A-Z][a-zA-Z0-9_]* '<' [a-zA-Z0-9,_<>]+ '>'
+
+type_identifier::= [A-Z][a-zA-Z0-9_]*('<'[a-zA-Z0-9,_<>]+'>')?
+attr_identifier::= [a-z][a-zA-Z_]*
+
+any_identifier::=type_identifier | attr_identifier
+
+local_term_code_ref::= '['[a-zA-Z0-9][a-zA-Z0-9._\-]*']'
+local_code::= a[ct][0-9.]+
+
+doubleQuoteMultilineString::='"' (.+?) '"'
+squareBracketQuotedString::='[' (.+?) ']'
+quotedString::=doubleQuoteMultilineString|squareBracketQuotedString
+
+fileref::= [a-zA-Z0-9\-_]+ ('.' [a-zA-Z0-9\-_]+)*
+
+/* This does not look like a regex for regex, regex are composed of specific characters */
+/*regex = QuotedString("/",escQuote='\\',unquoteResults=False)*/
+/* And this is not a way to describe a regex as well but it will have to do for now */
+regex::='/' (.+?) '/'
+string_::= doubleQuoteMultilineString | regex
+
+path_segment::= attr_identifier local_term_code_ref?
+relative_path::= path_segment ('/' path_segment)* 
+
+absolute_path::='/' relative_path?
+
+key = attr_identifier | (LBRK quotedString RBRK)
+sign = [+-]
+real::= sign? [0-9]* "." [0-9]+
+integer::=sign? [0-9]+
+real::= sign?[0-9]+(\.[0-9]+)?([eE][0-9]+)?
+
+/* 
+Why are these restrictions imposed on these numbers? */
+/*
+realLead = ((Word(nums,max=3)+OneOrMore('_'+Word(nums,exact=3))).setParseAction(lambda t:t[0].replace('_','')) | Word(nums) ) + FollowedBy('.') + ~FollowedBy('..')
+real = Combine(Optional(sign) + (realLead + '.' + Optional(Word(nums)) + Optional(Regex('[eE][+-]?[0-9]+')) | '.' + Word(nums) + Optional(Regex('[eE][+-]?[0-9]+')) ) )
+*/
+
+/* Is this alright for URIs? */
+uri = Combine(Word(alphas) + '://' + CharsNotIn(" >"))
+val = real | integer | attr_identifier
+
+valueDef = Forward()
+valueDef << Group( key + EQ + LT +
+        Optional( Dict(OneOrMore( valueDef )) |
+          (quotedString + ~Literal(",")) |
+          Group(delimitedList(quotedString | ELLIPSIS) ) |
+          QuotedString("|", unquoteResults=False) |
+          real | integer | uri
+        ) + GT )
+
+# expressions specific to the Definition section (uses cADL)
+
+str_::= dblQuotedString
+character = Combine("'" + ( Word(printables.replace("\\"," "),exact=1) |
+                            Word('\\',r"\ntrf'",exact=2) |
+                            Word('\\',nums,min=2) |
+                            Word('&',alphanums+"_") + ";" |
+                            "&#x" + Word(nums,exact=4) ) + "'")
+                            
+arithOperand = real | integer | str_ | character | absolute_path | attr_identifier
+
+arithExpr = operatorPrecedence(arithOperand,
+    [
+    ("-", 1, opAssoc.RIGHT),
+    (oneOf("+ - / * ^"), 2, opAssoc.LEFT),
+    ])
+
+comparisonOperator::= EQ | NEQ | LT | GT | LE | GE 
+
+arithComparison::= arithExpr comparisonOperator arithExpr
+
+
+boolOperand::= (EXISTS absolute_path) | (relative_path (MATCHES | IS_IN) (LBRC c_primitive RBRC)) | TRUE | FALSE | arithComparison
+
+/*
+TODO, HIGH: Expand this properly
+*/
+
+boolExpr = operatorPrecedence(boolOperand,
+    [
+    (NOT, 1, opAssoc.RIGHT),
+    ((AND | OR | XOR | IMPLIES), 2, opAssoc.LEFT),
+    ] )
+
+complex_object_id::=type_identifier local_term_code_ref?
+occurrence_spec::= (integer '..' (integer|"*")) | integer | STAR
+
+/*
+TODO, HIGH: Expand this properly
+*/
+defaultOccurrences::= ParseResults([1, '..', 1])
+
+/*
+defaultOccurrences["min"] = 1
+defaultOccurrences["max"] = 1
+defaultOccurrences["exact"] = 1
+*/
+
+c_occurrences::=OCCURRENCES (MATCHES|IS_IN) LBRC occurrence_spec RBRC
+complex_object_head::= complex_object_id c_occurrences
+existence_spec::= (integer '..' integer) | integer
+c_existence::= EXISTENCE (MATCHES | IS_IN) LBRC existence_spec RBRC
+cardinality_spec::=occurrence_spec ( Optional(SEMI + (ORDERED|UNORDERED)("order")) & Optional(SEMI + UNIQUE("unique")) )
+c_cardinality::= CARDINALITY (MATCHES | IS_IN) LBRC cardinality_spec RBRC
+c_attribute_head::= attr_identifier c_existence? c_cardinality?
+c_attribute::= c_attribute_head (MATCHES | IS_IN) LBRC c_object+ RBRC
+complex_object_body::= STAR | c_attribute+
+
+c_complex_object::= complex_object_head (MATCHES | IS_IN) LBRC complex_object_body RBRC
+archetype_internal_ref = USE_NODE + type_identifier + c_occurrences + absolute_path
+
+assertion::= ( any_identifier COLON boolExpr) | boolExpr
+c_includes::= INCLUDE assertion+
+c_excludes::= EXCLUDE + assertion+
+archetype_slot::=ALLOW_ARCHETYPE type_identifier local_term_code_ref? c_occurrences MATCHES (LBRC c_includes? & c_excludes? RBRC
+
+constraint_ref::= local_term_code_ref
+code::=[a-zA-Z0-9._\-]+
+c_term_code_constraint::= LBRK ([a-zA-Z0-9()._\-]+::) ((code (COMA code)*))? (SEMI code)? RBRK
+
+qualified_term_code_ref::=[[a-zA-Z0-9._\-()]+::[a-zA-Z0-9._\-]+\]
+c_code_phrase ::= c_term_code_constraint | qualified_term_code_ref
+ordinal::= integer BAR qualified_term_code_ref
+c_ordinal::= (ordinal (COMA ordinal)*) (SEMI integer)?
+/* 
+TODO, HIGH: Nice trick to create a class, leaving it as it is for the moment 
+*/
+c_real_interval::= 'make_interval(real)'
+c_real::= ((real COMA ELLIPSIS) | (real (COMA real)*) | c_real_interval) (SEMI real)?
+date_constraint_pattern::= [yY][yY][yY][yY]-[mM?X][mM?X]-[dD?X][dD?X]
+date_value::= [0-9]{4}-[0-1][0-9](-[0-3][0-9])?
+/* 
+TODO, HIGH: Nice trick to create a class, leaving it as it is for the moment 
+*/
+date_interval::='make_interval(date_value)'
+c_date_constraint::= date_constraint_pattern | date_value | date_interval
+c_date::= c_date_constraint (SEMI date_value)?
+
+time_constraint_pattern::=[hH][hH]:[mM?X][mM?X]:[sS?X][sS?X]
+time_value::= [0-2][0-9]:[0-6][0-9]:[0-6][0-9](,[0-9]+)?(Z|[+-][0-9]{4})?|[0-2][0-9]:[0-6][0-9](Z|[+-][0-9]{4})?
+/* 
+TODO, HIGH: Nice trick to create a class, leaving it as it is for the moment 
+*/
+time_interval::= 'make_interval(time_value)'
+
+c_time_constraint::= time_constraint_pattern | time_value | time_interval
+
+c_time::= c_time_constraint (SEMI time_value)?
+
+date_time_constraint_pattern::= [yY][yY][yY][yY]-[mM?][mM?]-[dD?X][dD?X][T ][hH?X][hH?X]:[mM?X][mM?X]:[sS?X][sS?X]
+
+/*
+TODO, HIGH: Reshape these multiline definitions at some point
+*/
+datetime_value::=[0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-6][0-9]:[0-6][0-9](,[0-9]+)?(Z|[+-][0-9]{4})? |
+                 [0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-6][0-9](Z|[+-][0-9]{4})? |
+                 [0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9](Z|[+-][0-9]{4})?
+
+/* 
+TODO, HIGH: Nice trick to create a class, leaving it as it is for the moment 
+*/
+datetime_interval::='make_interval(datetime_value)'
+c_datetime_constraint::= date_time_constraint_pattern | datetime_value | datetime_interval
+c_datetime::=c_datetime_constraint (SEMI datetime_value)?
+
+/*Handle durations*/
+duration_constraint_pattern::= P[yY]?[mM]?[Ww]?[dD]?T[hH]?[mM]?[sS]?|P[yY]?[mM]?[Ww]?[dD]?
+/*
+TODO, HIGH: Check if the 'P' modifier is properly understood by EBNF (which it's probably not) and rearrange accordingly
+*/
+duration_value::=P([0-9]+[yY])?([0-9]+[mM])?([0-9]+[wW])?([0-9]+[dD])?[T ]([0-9]+[hH])?([0-9]+[mM])?([0-9]+[sS])?|P([0-9]+[yY])?([0-9]+[mM])?([0-9]+[wW])?([0-9]+[dD])?
+
+/* 
+TODO, HIGH: Nice trick to create a class, leaving it as it is for the moment 
+*/
+duration_interval::='make_interval(duration_value)'
+c_duration_constraint::=duration_constraint_pattern | duration_value | duration_interval
+c_duration::= c_duration_constraint (SEMI duration_value)?
+c_duration = c_duration_constraint + (SEMI duration_value)?
+
+/* 
+TODO, HIGH: Nice trick to create a class, leaving it as it is for the moment 
+*/
+
+c_integer_interval::= 'make_interval(integer)'
+c_integer::= (integer COMA ELLIPSIS | (integer (COMA integer)*) | c_integer_interval) (SEMI integer)?
+c_string::=(string_ COMA ELLIPSIS (string_ (COMA string_)*)) (SEMI string_)?
+c_boolean::= (TRUE COMA FALSE)|(FALSE COMA TRUE | TRUE | FALSE) | (SEMI (TRUE|FALSE))?
+
+c_primitive::=c_real | c_datetime | c_date | c_time | c_duration | c_integer | c_string | c_boolean
+
+
+domain_value = Forward()
+array_ref = LBRK + dblQuotedString + RBRK
+domain_value << ( LT + Optional( Dict(OneOrMore( Group((attr_identifier|array_ref) + EQ + domain_value) ) ) |
+                        QuotedString('"',escQuote='\\',multiline=True) | qualified_term_code_ref | c_primitive
+                                    ) + GT )
+
+domain_type::= (type_identifier domain_value)
+
+c_object::=c_complex_object | archetype_internal_ref | archetype_slot | constraint_ref | c_code_phrase | c_ordinal | domain_type ) | c_primitive
+
+
+
+/*ADL file sections:*/
+versionNum::=[0-9]+ ('.' [0-9]+)*
+
+/*innerListClass is not strictly required but it makes the definition of the delimited list much easier and readable*/
+innerListClass::= key EQ (versionNum|val) | 'controlled' | 'uncontrolled'
+archetypeSection::= ARCHETYPE LPAR (innerListClass (';' innerListClass)*) RPAR fileref
+
+specializeSection::=SPECIALIZE fileref
+conceptSection::=CONCEPT quotedString
+languageSection::=LANGUAGE valueDef+
+descriptionSection::=DESCRIPTION valueDef+
+definitionSection::=DEFINITION c_object
+invariantSection::=INVARIANT (attr_identifier COLON boolExpr)*
+ontologySection::=ONTOLOGY valueDef+
+revisionHistorySection::=REVISION_HISTORY valueDef+
+    
+archetypeDefinition::=archetypeSection specializeSection? conceptSection? languageSection descriptionSection definitionSection invariantSection? ontologySection revisionHistorySection?
+
+/*
+comment = "--" + restOfLine
+archetypeDefinition.ignore(comment)
+*/
