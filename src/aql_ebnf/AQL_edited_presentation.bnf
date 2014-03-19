@@ -1,0 +1,103 @@
+// Author: Bostjan Lah
+// (c) Copyright, Marand, http://www.marand.com
+// Licensed under LGPL: http://www.gnu.org/copyleft/lesser.html
+// Based on AQL grammar by Ocean Informatics: http://www.openehr.org/wiki/download/attachments/2949295/EQL_v0.6.grm?version=1&modificationDate=1259650833000
+
+// Rule Definitions
+          
+Query ::= Select (From (Where? OrderBy?)?)
+Select ::= 'SELECT' Top? SelectExpr
+Top ::= 'TOP' (Integer ('BACKWARD' | 'FORWARD')?)
+Where ::= 'WHERE' IdentifiedExpr
+OrderBy ::= 'ORDER BY' OrderBySeq
+OrderBySeq  ::= OrderByExpr (',' OrderBySeq)?
+OrderByExpr ::= IdentifiedPath ('DESCENDING'|'ASCENDING'|'DESC'|'ASC')?
+SelectExpr ::= IdentifiedPathSeq
+//! When multiple paths provided, each IdentifiedPath must represent an object of type DataValue
+IdentifiedPathSeq ::= IdentifiedPath ((('as' Identifier)? (','IdentifiedPathSeq)?)?)?
+From ::=   'FROM' (FromExpr | (FromEHR ContainsExpr?))
+FromEHR ::= 'EHR' (StandardPredicate | (Identifier StandardPredicate?))
+IdentifiedExpr ::= IdentifiedEquality | IdentifiedExprBoolean | '(' IdentifiedExprBoolean ')'
+IdentifiedExprBoolean ::= (IdentifiedExpr ('OR'|'AND'|'XOR') IdentifiedExpr) | ('NOT' ('(' IdentifiedExprBoolean ')'|IdentifiedEquality))
+
+IdentifiedEquality ::= (IdentifiedOperand ((ComparableOperator IdentifiedOperand)|('matches' ('{' MatchesOperand '}'|RegExPattern)))) | ('EXISTS' IdentifiedPath)
+
+//AA: What's with the (m|M)atchesOperand and RegExPattern?
+//IdentifiedEquality ::= IdentifiedOperand ComparableOperator IdentifiedOperand
+//		     | IdentifiedOperand 'matches' '{' MatchesOperand '}'
+//                     | IdentifiedOperand 'matches' RegExPattern
+//                     | 'EXISTS' IdentifiedPath
+//		     | identifiedOperand 'matches' '{' matchesOperand '}'
+//	             | identifiedOperand 'matches' REGEXPATTERN
+//	             | 'EXISTS' identifiedPath
+
+
+IdentifiedOperand ::= Operand | IdentifiedPath
+
+IdentifiedPath::= Identifier ((Predicate ('/' ObjectPath)?)|('/' ObjectPath))?
+                    
+Predicate ::= NodePredicate
+
+NodePredicate ::= '['NodePredicateOr']'
+
+NodePredicateOr ::= NodePredicateAnd ('or' NodePredicateAnd)?
+
+NodePredicateAnd ::= NodePredicateComparable | NodePredicateAnd 'and' NodePredicateComparable
+
+NodePredicateComparable ::= PredicateOperand ComparableOperator PredicateOperand
+                          | NodeId (',' (String|parameter))?
+                          | NodePredicateRegEx     
+                          | ArchetypeId (',' (String|parameter))?
+
+NodePredicateRegEx    ::= RegExPattern | PredicateOperand 'matches' RegExPattern
+
+MatchesOperand ::= ValueListItems | UriValue
+
+
+ValueListItems ::= Operand (',' ValueListItems)?
+
+URI     ::= '{' UriValue '}'
+
+ArchetypePredicate ::= '[' (ArchetypeId|Parameter|RegExPattern) ']'
+
+VersionPredicate ::= '[' VersionPredicateOptions ']'
+
+VersionPredicateOptions ::= 'latest_version' | 'all_versions'
+
+StandardPredicate ::= '[' PredicateExpr ']'
+
+PredicateExpr ::= PredicateOr
+
+PredicateOr ::= PredicateAnd | PredicateOr 'or' PredicateAnd
+
+PredicateAnd ::= PredicateEquality | PredicateAnd 'and' PredicateEquality
+
+PredicateEquality ::= PredicateOperand ComparableOperator PredicateOperand
+
+PredicateOperand ::= ObjectPath | Operand
+
+Operand ::= String | Integer | Float | Date | Parameter | Boolean
+
+ObjectPath ::=  PathPart ('/' ObjectPath)?
+
+PathPart ::= Identifier (Predicate)?
+
+FromExpr ::=  SimpleClassExpr ContainsExpr?
+
+//! Check thislass
+ContainsExpr::= 'CONTAINS' ContainsExpression
+
+ContainsExpression ::= ClassExpr | ContainExpressionBoolean | '(' ContainExpressionBoolean ')'
+
+ContainExpressionBoolean ::= ContainsExpression ('OR'|'AND'|'XOR') ContainsExpression
+
+ClassExpr::=   SimpleClassExpr | '(' SimpleClassExpr ContainsExpr ')' | SimpleClassExpr ContainsExpr
+
+SimpleClassExpr::= Identifier Identifier? | ArchetypedClassExpr VersionedClassExpr
+
+ArchetypedClassExpr::= Identifier Identifier? ArchetypePredicate	
+
+
+VersionedClassExpr::= 'VERSIONED_OBJECT' (StandardPredicate | (Identifier StandardPredicate?))               
+
+VersionClassExpr::= 'VERSION' (Identifier (StandardPredicate|VersionPredicate)? | StandardPredicate | VersionPredicate)

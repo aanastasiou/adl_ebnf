@@ -1,0 +1,275 @@
+"Name"    = 'Archetype Query Language (AQL) - {Equal}'
+"Version" = '0.6'
+"Date"	   = '21 Oct 2009'
+"Author"  = 'Chunlan Ma & Heath Frankel'
+"About"   = 'Ocean Informatics'
+
+
+! Gramma Configuration
+
+"Case Sensitive" = 'False'
+"Start Symbol"   = <Query>
+
+! =============================================================================
+! Comments
+! New features:
+! 1. Support matches operator
+! 2. Support string RegEx pattern criteria, e.g. 
+!    WHERE composition/name matches {/lab.*/}
+!    FROM EHR CONTAINS COMPOSITION c[{/openEHR-EHR-COMPOSITION\.problem_list(-[a-zA-Z0-9_]+)*\.v1/}]
+! 3. Allow parentheses in both FROM and WHERE clause 
+! 4. Support matches uri criteria. Uri criteria can be used to represent terminology criteria captured in a webservice call format. For example, 
+!    SELECT problem 
+!    FROM EHR e[ehr_id/value=$ehruid] CONTAINS (COMPOSITION c[openEHR-EHR-COMPOSITION.problem_list.v1] CONTAINS EVALUATION problem[openEHR-EHR-EVALUATION.problem-diagnosis.v1]) 
+!    WHERE problem/data/items[at0002.1]/value/defining_code matches { terminology://Snomed-CT/hierarchy?rootConceptId=73211009 } 
+! 5. Support NOT and EXISTS in WHERE clause
+! =============================================================================
+
+Comment Start = '/*'
+Comment End   = '*/'
+Comment Line  = '!'
+
+! Character Set Definitions
+
+{quote} = ['']
+{String Char} = {Printable} - ["] - {quote}
+{Hex Char} = {Digit} + [ABCDEF]
+{NonZeroDigit} = {Digit} - [0]
+
+{LetterMinusA} = {Letter} - [aA]
+{LetterMinusT} = {Letter} - [tT]
+
+!{AlphanumericMinusT} = {Alphanumeric} - [t]
+!{NonZeroAlphanumeric} = {Alphanumeric} - [0]
+{IdChar} = {Alphanumeric} + [_] - [.]   ! not allowing a dot
+{IdCharMinusT} = {IdChar} - [tT]
+
+{UriString} = {Alphanumeric} + [_-/:.?&%$#@!+=* ]
+
+!{RegExChar} = {Alphanumeric} + [']'] + ['['] + [_-/:.?&%$#@!+=*() ]
+{RegExChar} = {Alphanumeric} + [_-/:.?&%$#|@!+=*()\\\^{}] + [']'] + ['[']
+
+
+! Terminal Definitions
+
+!Identifier  = {Letter}({Alphanumeric}|'_')*   ! Conflicts with UID
+!Identifier  = {Letter}{IdChar}*   ! Conflicts with extended NodeId 
+! restricted to allow only letters after the 4th character due to conflict with extended NodeId
+!Identifier  = {Letter}{IdChar}?{IdChar}?{IdChar}?({Letter}|'_')*  !Conficts with NodeId which may have any length of digit, such as at0.9
+Identifier = {LetterMinusA}{IdCharMinusT}?{IdChar}* | 'a''t'?(({letter}|'_')*|{LetterMinusT}{Alphanumeric}*)  
+
+!PathItem = '/'{Letter}({Alphanumeric}|'_')*
+	
+String      = '"'{String Char}*'"'
+            | ''{String Char}*''
+Integer     = {Digit}+
+Float       = {Digit}+'.'{Digit}+
+Date        = ''{Digit}{Digit}{Digit}{Digit}'-'{Digit}{Digit}'-'{Digit}{Digit}''
+Boolean     = 'true' | 'false'
+!NodeId      = 'a''t'{Digit}{Digit}{Digit}{Digit}
+! conflict with Identifier
+!NodeId	     = 'at'({Digit}{Digit}{Digit}{Digit}('.0'*('.'{NonZeroDigit}{Digit}*)+|('.'{NonZeroDigit}{Digit}*)*)|'0''.0'*('.'{NonZeroDigit}{Digit}*)+|('.'{NonZeroDigit}{Digit}*)+)
+NodeId	     = 'at'({Digit}+('.'{Digit}+)*) 
+
+!Parameter   = '$'{letter}({Alphanumeric}|'_')*
+Parameter   = '$'{letter}{IdChar}*
+
+! could constrain UID further
+UniqueId    = {digit}+('.'{digit}+)+'.'{digit}+  ! OID
+            | {Hex Char}+('-'{Hex Char}+)+       ! UUID
+
+! could constrain ArchetypeId further
+!ArchetypeId = {Letter}+'-'{Letter}+'-'({Letter}|'_')+'.'({Letter}|'_'|'-')+'.v'{Digit}+('.'{Digit}+)?  ! not allow a number in archetype id concept, such as openEHR-EHR-OBSERVATION.laboratory-hba1c.v1 
+ArchetypeId = {Letter}+'-'{Letter}+'-'({Letter}|'_')+'.'({IdChar}|'-')+'.v'{Digit}+('.'{Digit}+)?
+ComparableOperator = '=' | '!=' | '>' | '>=' | '<' | '<='
+
+UriValue   = {Letter}+'://'({UriString}|'['|']'|', '''|'')* 
+            |{Letter}+':'({UriString}|'['|']'|'')*
+
+RegExPattern = '{/'{RegExChar}+'/}'
+
+! Rule Definitions
+<Query> ::= <Select> <From>
+            | <Select> <From> <Where>
+            | <Select> <From> <OrderBy>   ! is this allowed?
+            | <Select> <From> <Where> <OrderBy>
+            
+<Select> ::= 'SELECT' <SelectExpr>
+         | 'SELECT' <TOP> <SelectExpr>
+
+<Top> ::= 'TOP' Integer
+          | 'TOP' Integer 'BACKWARD'
+          | 'TOP' Integer 'FORWARD'
+          
+<Where> ::= 'WHERE' <IdentifiedExpr>
+
+<OrderBy> ::= 'ORDER BY' <OrderBySeq>
+<OrderBySeq>  ::= <OrderByExpr> 
+		| <OrderByExpr> ',' <OrderBySeq>
+
+<OrderByExpr> ::= <IdentifiedPath>
+		| <IdentifiedPath> 'DESCENDING'
+		| <IdentifiedPath> 'ASCENDING'
+		| <IdentifiedPath> 'DESC'
+		| <IdentifiedPath> 'ASC'
+
+<SelectExpr> ::= <IdentifiedPathSeq>
+! When multiple paths provided, each IdentifiedPath must represent an object of type DataValue
+<IdentifiedPathSeq> ::= <IdentifiedPath>
+			| <IdentifiedPath> 'as' Identifier
+			| <IdentifiedPath> ',' <IdentifiedPathSeq>
+			| <IdentifiedPath> 'as' Identifier ',' <IdentifiedPathSeq>
+
+<From> ::=   'FROM' <FromExpr>		! stop or/and without root class
+	    | 'FROM' <FromEHR> <ContainsExpr>
+           | 'FROM' <FromEHR>
+!          'FROM' <ContainsOr>  
+
+<FromExpr> ::=  <SimpleClassExpr>		
+		| <SimpleClassExpr> <ContainsExpr>	
+       
+<FromEHR> ::= 'EHR' <StandardPredicate>
+              | 'EHR' Identifier <StandardPredicate>
+              | 'EHR' Identifier
+
+<IdentifiedExpr> ::= <IdentifiedEquality>
+                   | <IdentifiedExprBoolean>
+                   |'(' <IdentifiedExprBoolean> ')'
+
+<IdentifiedExprBoolean> ::= <IdentifiedExpr> 'OR' <IdentifiedExpr>
+                              | <IdentifiedExpr> 'AND' <IdentifiedExpr>
+                              | <IdentifiedExpr> 'XOR' <IdentifiedExpr>
+                              | 'NOT''(' <IdentifiedExprBoolean> ')'
+                              | 'NOT' <IdentifiedEquality>
+                             
+<IdentifiedEquality> ::= <IdentifiedOperand> ComparableOperator <IdentifiedOperand>
+			     | <IdentifiedOperand> 'matches' '{' <MatchesOperand> '}'
+                          | <IdentifiedOperand> 'matches' RegExPattern
+                          | 'EXISTS' <IdentifiedPath>
+
+<IdentifiedOperand> ::= <Operand> | <IdentifiedPath>
+!<IdentifiedOperand> ::= <Operand> | <RelativePath>
+
+<IdentifiedPath>::= Identifier
+                    | Identifier <Predicate>
+                    | Identifier '/' <ObjectPath>
+                    | Identifier <Predicate> '/' <ObjectPath>
+!		| Identifer <AbsolutePath>
+!		| Identifer <Predicate> <AbsolutePath>
+
+
+<Predicate> ::= <NodePredicate>
+
+<NodePredicate> ::= '['<NodePredicateOr>']'
+
+<NodePredicateOr> ::= <NodePredicateAnd>
+                 | <NodePredicateOr> 'or' <NodePredicateAnd>
+<NodePredicateAnd> ::= <NodePredicateComparable>
+                 | <NodePredicateAnd> 'and' <NodePredicateComparable>
+                                  
+<NodePredicateComparable> ::= <PredicateOperand> ComparableOperator <PredicateOperand>
+                          | NodeId
+                          | NodeId ',' String        ! <NodeId> and name/value = <String> shortcut
+                          | NodeId ',' parameter     ! <NodeId> and name/value = <Parameter> shortcut
+                          | <NodePredicateRegEx>     ! /items[{/at0001.*/}], /items[at0001 and name/value matches {//}]
+                          | ArchetypeId
+                          | ArchetypeId ',' String        ! <NodeId> and name/value = <String> shortcut
+                          | ArchetypeId ',' parameter     ! <NodeId> and name/value = <Parameter> shortcut
+                          
+<NodePredicateRegEx>    ::= RegExPattern
+                          | <PredicateOperand> 'matches' RegExPattern                          
+
+<MatchesOperand> ::= <ValueListItems>
+			| UriValue
+			                        
+! <ValueList> ::= '{'<ValueListItems>'}'
+
+<ValueListItems> ::= <Operand>
+                     |<Operand> ',' <ValueListItems>
+
+<URI>     ::= '{' UriValue '}'
+
+
+<ArchetypePredicate> ::= '[' ArchetypeId ']'
+			 | '[' Parameter ']'
+                      | '[' RegExPattern ']'
+			 
+<VersionPredicate> ::= '[' <VersionPredicateOptions> ']'
+<VersionPredicateOptions> ::= 'latest_version' | 'all_versions'
+
+<StandardPredicate> ::= '[' <PredicateExpr> ']'
+<PredicateExpr> ::= <PredicateOr>
+<PredicateOr> ::= <PredicateAnd>
+                 | <PredicateOr> 'or' <PredicateAnd>
+<PredicateAnd> ::= <PredicateEquality>
+                 | <PredicateAnd> 'and' <PredicateEquality>
+
+<PredicateEquality> ::= <PredicateOperand> ComparableOperator <PredicateOperand>
+
+<PredicateOperand> ::= !Identifier
+			!| Identifier PathItem
+                     | <ObjectPath>
+                     | <Operand> 
+
+<Operand> ::= String | Integer | Float | Date | Parameter | Boolean
+
+<ObjectPath> ::=  <PathPart>
+                | <PathPart> '/' <ObjectPath>
+
+<PathPart> ::= Identifier
+           | Identifier <Predicate>
+
+! Check this
+<ContainsExpr>::= 'CONTAINS' <ContainsExpression>
+                  !'CONTAINS' <ContainsOr>
+
+<ContainsExpression> ::= <ClassExpr>
+                        | <ContainExpressionBoolean>
+                        |'(' <ContainExpressionBoolean> ')'
+
+<ContainExpressionBoolean> ::= <ContainsExpression> 'OR' <ContainsExpression>
+                              | <ContainsExpression> 'AND' <ContainsExpression>
+                              | <ContainsExpression> 'XOR' <ContainsExpression>
+
+
+<ClassExpr>::=   <SimpleClassExpr>
+		   | '(' <SimpleClassExpr> <ContainsExpr> ')'
+		   | <SimpleClassExpr> <ContainsExpr>
+                 
+<SimpleClassExpr>::= Identifier							! RM_TYPE_NAME
+               | Identifier Identifier					! RM_TYPE_NAME variable
+               | <ArchetypedClassExpr>
+		 | <VersionedClassExpr> 
+		 | <VersionClassExpr> 
+		 ! | <IdentifiedObjectExpr>                           ! need to be used once VersionedClassExpr is removed
+               
+<ArchetypedClassExpr>::= Identifier <ArchetypePredicate>	! RM_TYPE_NAME [archetype_id]
+               | Identifier Identifier <ArchetypePredicate>	! RM_TYPE_NAME variable [archetype_id]
+
+! need to be used once VersionedClassExpr is removed
+!<IdentifiedObjectExpr>::= Identifier <StandardPredicate>	! RM_TYPE_NAME [path operator operand]
+!               | Identifier Identifier <StandardPredicate>	! RM_TYPE_NAME variable [path operator operand]
+
+<VersionedClassExpr>::= 'VERSIONED_OBJECT'
+               | 'VERSIONED_OBJECT' Identifier
+               | 'VERSIONED_OBJECT' <StandardPredicate>
+               | 'VERSIONED_OBJECT' Identifier <StandardPredicate>
+
+<VersionClassExpr>::= 'VERSION'
+               | 'VERSION' Identifier
+               | 'VERSION' <StandardPredicate>
+               | 'VERSION' Identifier <StandardPredicate>
+		 | 'VERSION' <VersionPredicate>
+               | 'VERSION' Identifier <VersionPredicate>
+
+! Example
+! Note: 'select <Composition>' returns the Composition assocaited with the
+! latest Version for that Versioned_Composition
+!
+! Select Top 20 BACKWARD c1|c2
+! From EHR e[...] contains (Composition c1 contains (Observation o1 and Evaluation e)
+!      or Observation o2) or Composition c2
+! Where o1/Event/origin > ? and c1/contaxt/health_care_facility = ?
+!       and c1/context/other_context[items[at0001] = ?
+!       and e/contribution[uid=v/contribution/uid]/audit/commit_time < ?
+! Order by c1/context/start_time

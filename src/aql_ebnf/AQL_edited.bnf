@@ -1,0 +1,206 @@
+// Author: Bostjan Lah
+// (c) Copyright, Marand, http://www.marand.com
+// Licensed under LGPL: http://www.gnu.org/copyleft/lesser.html
+// Based on AQL grammar by Ocean Informatics: http://www.openehr.org/wiki/download/attachments/2949295/EQL_v0.6.grm?version=1&modificationDate=1259650833000
+
+// Rule Definitions
+
+Query ::= Select From
+           | Select From Where
+            | Select From OrderBy
+            | Select From Where OrderBy
+
+Select ::= 'SELECT' SelectExpr
+         | 'SELECT' TOP SelectExpr
+
+Top ::= 'TOP' Integer
+          | 'TOP' Integer 'BACKWARD'
+          | 'TOP' Integer 'FORWARD'
+
+Where ::= 'WHERE' IdentifiedExpr
+
+OrderBy ::= 'ORDER BY' OrderBySeq
+
+OrderBySeq  ::= OrderByExpr 
+		| OrderByExpr ',' OrderBySeq
+
+OrderByExpr ::= IdentifiedPath
+		| IdentifiedPath 'DESCENDING'
+		| IdentifiedPath 'ASCENDING'
+		| IdentifiedPath 'DESC'
+		| IdentifiedPath 'ASC'
+
+SelectExpr ::= IdentifiedPathSeq
+
+//! When multiple paths provided, each IdentifiedPath must represent an object of type DataValue
+IdentifiedPathSeq ::= IdentifiedPath
+			| IdentifiedPath 'as' Identifier
+			| IdentifiedPath ',' IdentifiedPathSeq
+			| IdentifiedPath 'as' Identifier ',' IdentifiedPathSeq
+
+From ::=   'FROM' FromExpr		
+	    | 'FROM' FromEHR ContainsExpr
+           | 'FROM' FromEHR
+
+FromEHR ::= 'EHR' StandardPredicate
+              | 'EHR' Identifier StandardPredicate
+              | 'EHR' Identifier
+
+IdentifiedExpr ::= IdentifiedEquality
+                   | IdentifiedExprBoolean
+                   |'(' IdentifiedExprBoolean ')'
+
+IdentifiedExprBoolean ::= IdentifiedExpr 'OR' IdentifiedExpr
+                              | IdentifiedExpr 'AND' IdentifiedExpr
+                              | IdentifiedExpr 'XOR' IdentifiedExpr
+                              | 'NOT''(' IdentifiedExprBoolean ')'
+                              | 'NOT' IdentifiedEquality
+
+IdentifiedEquality ::= IdentifiedOperand ComparableOperator IdentifiedOperand
+		     | IdentifiedOperand 'matches' '{' MatchesOperand '}'
+                     | IdentifiedOperand 'matches' RegExPattern
+                     | 'EXISTS' IdentifiedPath
+		     | identifiedOperand 'matches' '{' matchesOperand '}'
+	             | identifiedOperand 'matches' REGEXPATTERN
+	             | 'EXISTS' identifiedPath
+
+IdentifiedOperand ::= Operand | IdentifiedPath
+
+
+IdentifiedPath::= Identifier
+                    | Identifier Predicate
+                    | Identifier '/' ObjectPath
+                    | Identifier Predicate '/' ObjectPath
+
+Predicate ::= NodePredicate
+
+NodePredicate ::= '['NodePredicateOr']'
+
+NodePredicateOr ::= NodePredicateAnd
+                 | NodePredicateOr 'or' NodePredicateAnd
+
+NodePredicateAnd ::= NodePredicateComparable
+		| NodePredicateAnd 'and' NodePredicateComparable
+
+NodePredicateComparable ::= PredicateOperand ComparableOperator PredicateOperand
+                          | NodeId
+                          | NodeId ',' String        
+                          | NodeId ',' parameter     
+                          | NodePredicateRegEx     
+                          | ArchetypeId
+                          | ArchetypeId ',' String        
+                          | ArchetypeId ',' parameter     
+
+NodePredicateRegEx    ::= RegExPattern
+                          | PredicateOperand 'matches' RegExPattern
+
+MatchesOperand ::= ValueListItems
+			| UriValue
+
+
+ValueListItems ::= Operand
+                     |Operand ',' ValueListItems
+
+URI     ::= '{' UriValue '}'
+
+ArchetypePredicate ::= '[' ArchetypeId ']'
+			 | '[' Parameter ']'
+                      | '[' RegExPattern ']'
+
+VersionPredicate ::= '[' VersionPredicateOptions ']'
+
+VersionPredicateOptions ::= 'latest_version' | 'all_versions'
+
+StandardPredicate ::= '[' PredicateExpr ']'
+
+PredicateExpr ::= PredicateOr
+
+PredicateOr ::= PredicateAnd
+                 | PredicateOr 'or' PredicateAnd
+
+PredicateAnd ::= PredicateEquality
+                 | PredicateAnd 'and' PredicateEquality
+
+PredicateEquality ::= PredicateOperand ComparableOperator PredicateOperand
+
+PredicateOperand ::= ObjectPath | Operand
+
+Operand ::= String | Integer | Float | Date | Parameter | Boolean
+
+ObjectPath ::=  PathPart
+                | PathPart '/' ObjectPath
+
+PathPart ::= Identifier
+           | Identifier Predicate
+
+FromExpr ::=  SimpleClassExpr
+		| SimpleClassExpr ContainsExpr
+
+//! Check thislass
+ContainsExpr::= 'CONTAINS' ContainsExpression
+
+ContainsExpression ::= ClassExpr
+                        | ContainExpressionBoolean
+                        |'(' ContainExpressionBoolean ')'
+// 	| '(' containExpressionBool ')' -> ^(OPEN containExpressionBool)
+
+ContainExpressionBoolean ::= ContainsExpression 'OR' ContainsExpression
+                              | ContainsExpression 'AND' ContainsExpression
+                              | ContainsExpression 'XOR' ContainsExpression
+
+ClassExpr::=   SimpleClassExpr
+		   | '(' SimpleClassExpr ContainsExpr ')'
+		   | SimpleClassExpr ContainsExpr
+
+SimpleClassExpr::= Identifier							
+               | Identifier Identifier					
+               | ArchetypedClassExpr
+		 | VersionedClassExpr
+		 | VersionClassExpr
+
+ArchetypedClassExpr::= Identifier ArchetypePredicate	
+               | Identifier Identifier ArchetypePredicate	
+
+
+VersionedClassExpr::= 'VERSIONED_OBJECT'
+               | 'VERSIONED_OBJECT' Identifier
+               | 'VERSIONED_OBJECT' StandardPredicate
+               | 'VERSIONED_OBJECT' Identifier StandardPredicate
+
+VersionClassExpr::= 'VERSION'
+               | 'VERSION' Identifier
+               | 'VERSION' StandardPredicate
+               | 'VERSION' Identifier StandardPredicate
+		 | 'VERSION' VersionPredicate
+               | 'VERSION' Identifier VersionPredicate
+
+// LEXER PATTERNS
+//
+// Terminal Definitions
+Boolean     ::= 'true' | 'false'
+
+NodeId	    ::= 'at'({Digit}+('.'{Digit}+)*)
+
+Identifier = {LetterMinusA}{IdCharMinusT}?{IdChar}* | 'a''t'?(({letter}|'_')*|{LetterMinusT}{Alphanumeric}*)
+
+// ???
+Integer     ::= {Digit}+
+Float       ::= {Digit}+'.'{Digit}+
+Date        ::= ''{Digit}{Digit}{Digit}{Digit}'-'{Digit}{Digit}'-'{Digit}{Digit}''
+Parameter   ::= '$'{letter}{IdChar}*
+
+//! could constrain UID further
+UniqueId    ::= {digit}+('.'{digit}+)+'.'{digit}+ 
+          | {Hex Char}+('-'{Hex Char}+)+       
+
+//! could constrain ArchetypeId further
+ArchetypeId ::= {Letter}+'-'{Letter}+'-'({Letter}|'_')+'.'({IdChar}|'-')+'.v'{Digit}+('.'{Digit}+)?
+
+ComparableOperator ::= '=' | '!=' | '>' | '>=' | '<' | '<='
+UriValue   ::= {Letter}+'://'({UriString}|'['|']'|', '''|'')*
+            |{Letter}+':'({UriString}|'['|']'|'')*
+            |LETTER+ ':' (URISTRING|'['|']'|'\'')*
+
+RegExPattern ::= '{/'{RegExChar}+'/}'
+
+String      ::= '"'{String Char}*'"'

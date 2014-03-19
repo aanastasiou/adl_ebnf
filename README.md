@@ -1,7 +1,5 @@
-adl_ebnf
-========
-
-openEHR ADL 1.5 EBNF description
+openEHR ADL 1.5 in EBNF
+=======================
 
 Background
 ----------
@@ -57,8 +55,10 @@ transcription to EBNF and the derivation of the essential rules that
 define the language is difficult.
 
 Therefore, instead of basing the derivation of the rules on that
-resource, the existing definition of a parser for ADL _1.4_, available
-from the OSHIP openEHR reference implementation in Python was used.
+resource, the existing definition of a parser for ADL _1.4_ (http://bazaar.launchpad.net/~higorpinto/oship/cr-ehr/view/head:/oship/src/oship/openehr/adl_1_4.py)
+, available from the OSHIP openEHR reference implementation in Python 
+was used.
+
 
 That project includes a(n almost) complete definition of ADL _1.4_
 expressed via pyparsing constructs which are very closely following
@@ -83,3 +83,6 @@ generic lambda functions.
 optimisations. However at this point it is best to express everything
 as simply as possible to first conclude with clear definitions for all
 classes.
+
+Please note: The project also includes a definition of AQL in EBNF 
+which was used primarily to generate syntax diagrams for that DSL.

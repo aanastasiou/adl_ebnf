@@ -1,0 +1,92 @@
+/* Work in progress for ADL 1.5 (Athanasios Anastasiou) */
+
+archetype_definition::= archetype | specialised_archetype | template | 
+                        template_overlay | operational_template | 
+                        transitional_archetype | 
+                        transitional_specialised_archetype
+
+archetype::= archetype_marker arch_meta_data archetype_id arch_language 
+            arch_description arch_definition arch_rules arch_terminology
+            arch_annotations
+            
+specialised_archetype::= archetype_marker arch_meta_data archetype_id
+                        arch_specialisation arch_language 
+                        arch_description arch_definition arch_rules 
+                        arch_terminology arch_annotations
+                        
+template::= template_marker arch_meta_data archetype_id
+            arch_specialisation arch_language arch_description 
+            arch_definition arch_rules arch_terminology arch_annotations
+            
+template_overlay::= template_overlay_marker arch_meta_data archetype_id
+                    arch_specialisation arch_language arch_definition 
+                    arch_terminology
+                    
+operational_template::=operational_template_marker arch_meta_data
+                        archetype_id arch_language arch_description 
+                        arch_definition arch_rules arch_terminology
+                        arch_annotations
+                        
+transitional_archetype::= archetype_marker arch_meta_data archetype_id
+                            arch_concept arch_language arch_description
+                            arch_definition arch_rules arch_terminology
+                            arch_annotations
+                            
+transitional_specialised_archetype::= archetype_marker arch_meta_data
+                                        archetype_id arch_specialisation
+                                        arch_concept arch_language
+                                        arch_description arch_definition
+                                        arch_rules arch_terminology 
+                                        arch_annotations
+                                        
+arch_concept::= SYM_CONCEPT V_CONCEPT_CODE | SYM_CONCEPT
+archetype_marker::= SYM_ARCHETYPE
+template_marker::= SYM_TEMPLATE
+template_overlay_marker::= SYM_TEMPLATE_OVERLAY
+operational_template_marker::=SYM_OPERATIONAL_TEMPLATE
+
+archetype_id::= V_ARCHETYPE_ID
+
+arch_meta_data:
+  -/-
+| ( arch_meta_data_items )
+arch_meta_data_items:
+  arch_meta_data_item
+| arch_meta_data_items ; arch_meta_data_item
+arch_meta_data_item:
+  SYM_ADL_VERSION = V_DOTTED_NUMERIC
+| SYM_UID = V_DOTTED_NUMERIC
+| SYM_UID = V_VALUE
+| SYM_IS_CONTROLLED
+| SYM_IS_GENERATED
+| V_IDENTIFIER = V_IDENTIFIER
+| V_IDENTIFIER = V_VALUE
+| V_IDENTIFIER
+| V_VALUE
+arch_specialisation:
+  SYM_SPECIALIZE V_ARCHETYPE_ID
+| SYM_SPECIALIZE error
+arch_language:
+  SYM_LANGUAGE V_ODIN_TEXT
+| SYM_LANGUAGE error
+arch_description:
+  SYM_DESCRIPTION V_ODIN_TEXT
+| SYM_DESCRIPTION error
+arch_definition:
+  SYM_DEFINITION V_CADL_TEXT
+| SYM_DEFINITION error
+arch_rules:
+  -/-
+| SYM_RULES V_RULES_TEXT
+| SYM_RULES error
+arch_terminology:
+  SYM_TERMINOLOGY V_ODIN_TEXT
+| SYM_TERMINOLOGY error
+arch_annotations:
+  -/-
+| SYM_ANNOTATIONS V_ODIN_TEXT
+| SYM_ANNOTATIONS error
+arch_component_terminologies:
+  SYM_COMPONENT_TERMINOLOGIES V_ODIN_TEXT
+| SYM_COMPONENT_TERMINOLOGIES error
+
