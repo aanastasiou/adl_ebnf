@@ -138,14 +138,13 @@ c_attr_head::= V_ATTRIBUTE_IDENTIFIER c_existence c_cardinality |
              
 c_attr_values::= c_object | c_attr_values c_object | c_any
 
-/* TODO: HIGH, Square brackets to denote optional? */
-c_attribute_tuple::= [ c_tuple_attr_ids ] SYM_MATCHES SYM_START_CBLOCK c_object_tuples SYM_END_CBLOCK
+c_attribute_tuple::= '[' c_tuple_attr_ids ']' SYM_MATCHES SYM_START_CBLOCK c_object_tuples SYM_END_CBLOCK
 
 c_tuple_attr_ids::=(V_ATTRIBUTE_IDENTIFIER (SYM_COMA V_ATTRIBUTE_IDENTIFIER)*)
 
 c_object_tuples::= (c_object_tuple (SYM_COMA c_object_tuple)*)
 
-c_object_tuple::= [ c_object_tuple_items ]
+c_object_tuple::= '[' c_object_tuple_items ']'
 
 /* TODO: HIGH, Revise this */
 c_object_tuple_items::= SYM_START_CBLOCK c_primitive_object SYM_END_CBLOCK |
