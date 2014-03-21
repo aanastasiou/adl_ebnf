@@ -1,5 +1,6 @@
 /* Work in progress for ADL 1.5 (Athanasios Anastasiou) */
 
+/* Definition of an Archetype */
 archetype_definition::= archetype | specialised_archetype | template | 
                         template_overlay | operational_template | 
                         transitional_archetype | 
@@ -40,53 +41,90 @@ transitional_specialised_archetype::= archetype_marker arch_meta_data
                                         arch_annotations
                                         
 arch_concept::= SYM_CONCEPT V_CONCEPT_CODE | SYM_CONCEPT
+
 archetype_marker::= SYM_ARCHETYPE
+
 template_marker::= SYM_TEMPLATE
+
 template_overlay_marker::= SYM_TEMPLATE_OVERLAY
-operational_template_marker::=SYM_OPERATIONAL_TEMPLATE
+operational_template_marker::= SYM_OPERATIONAL_TEMPLATE
 
 archetype_id::= V_ARCHETYPE_ID
 
-arch_meta_data:
-  -/-
-| ( arch_meta_data_items )
-arch_meta_data_items:
-  arch_meta_data_item
-| arch_meta_data_items ; arch_meta_data_item
-arch_meta_data_item:
-  SYM_ADL_VERSION = V_DOTTED_NUMERIC
-| SYM_UID = V_DOTTED_NUMERIC
-| SYM_UID = V_VALUE
-| SYM_IS_CONTROLLED
-| SYM_IS_GENERATED
-| V_IDENTIFIER = V_IDENTIFIER
-| V_IDENTIFIER = V_VALUE
-| V_IDENTIFIER
-| V_VALUE
-arch_specialisation:
-  SYM_SPECIALIZE V_ARCHETYPE_ID
-| SYM_SPECIALIZE error
-arch_language:
-  SYM_LANGUAGE V_ODIN_TEXT
-| SYM_LANGUAGE error
-arch_description:
-  SYM_DESCRIPTION V_ODIN_TEXT
-| SYM_DESCRIPTION error
-arch_definition:
-  SYM_DEFINITION V_CADL_TEXT
-| SYM_DEFINITION error
-arch_rules:
-  -/-
-| SYM_RULES V_RULES_TEXT
-| SYM_RULES error
-arch_terminology:
-  SYM_TERMINOLOGY V_ODIN_TEXT
-| SYM_TERMINOLOGY error
-arch_annotations:
-  -/-
-| SYM_ANNOTATIONS V_ODIN_TEXT
-| SYM_ANNOTATIONS error
-arch_component_terminologies:
-  SYM_COMPONENT_TERMINOLOGIES V_ODIN_TEXT
-| SYM_COMPONENT_TERMINOLOGIES error
+arch_meta_data: EMPTY | arch_meta_data_items
 
+arch_meta_data_items::= arch_meta_data_item | (arch_meta_data_item (';' arch_meta_data_item)*)
+
+
+arch_meta_data_item::= (SYM_ADL_VERSION = V_DOTTED_NUMERIC) | 
+                       (SYM_UID = V_DOTTED_NUMERIC) | 
+                       (SYM_UID = V_VALUE) |
+                       SYM_IS_CONTROLLED |
+                       SYM_IS_GENERATED |
+                       (V_IDENTIFIER = V_IDENTIFIER) |
+                       (V_IDENTIFIER = V_VALUE) |
+                        V_IDENTIFIER|
+                        V_VALUE
+
+arch_specialisation::= SYM_SPECIALIZE V_ARCHETYPE_ID
+
+arch_language::= SYM_LANGUAGE V_ODIN_TEXT
+
+arch_description::= SYM_DESCRIPTION V_ODIN_TEXT
+
+arch_definition::= SYM_DEFINITION V_CADL_TEXT
+
+arch_rules::= EMPTY | (SYM_RULES V_RULES_TEXT)
+
+arch_terminology::= SYM_TERMINOLOGY V_ODIN_TEXT
+
+arch_annotations::= EMPTY| (SYM_ANNOTATIONS V_ODIN_TEXT)
+
+arch_component_terminologies::= SYM_COMPONENT_TERMINOLOGIES V_ODIN_TEXT
+
+
+COMP_TERMS::= 'component_terminologies' | 'COMPONENT_TERMINOLOGIES'
+
+/* Definition of various symbols */
+
+/*Yet to be defined*/
+VALUESTR::=[a-zA-Z0-9._\-]+
+NAMESTR::=([a-zA-Z][a-zA-Z0-9_]+)
+ALPHANUM_STR::=[a-zA-Z0-9_]+
+
+
+SYM_ADL_VERSION::='adl_version'|'ADL_VERSION'
+SYM_ANNOTATIONS::=^('annotations'|'ANNOTATIONS')
+SYM_ARCHETYPE::= ^('archetype'|'ARCHETYPE')
+SYM_COMPONENT_TERMINOLOGIES::= ^COMP_TERMS
+SYM_CONCEPT::=^('concept'|'CONCEPT')
+SYM_DEFINITION::=^('definition'|'DEFINITION')
+SYM_DESCRIPTION::=^('description'|'DESCRIPTION')
+SYM_IS_CONTROLLED::='controlled'|'CONTROLLED'
+SYM_IS_GENERATED::='generated'|'GENERATED'
+SYM_LANGUAGE::= ^('language'|'LANGUAGE')
+SYM_OPERATIONAL_TEMPLATE::= ^('operational_template'|'OPERATIONAL_TEMPLATE')
+SYM_RULES::=^('rules'|'RULES')
+SYM_SPECIALIZE::=^('specialise'|'specialize'|'SPECIALISE'|'SPECIALIZE')
+SYM_TEMPLATE::= ^('template'|'TEMPLATE')
+SYM_TEMPLATE_OVERLAY::=^('template_overlay'|'TEMPLATE_OVERLAY')
+SYM_TERMINOLOGY::=^('terminology'|'TERMINOLOGY')
+SYM_UID::='uid'|'UID'
+
+/* Value definitions */
+V_IDENTIFIER::=NAMESTR+
+
+/*TODO, HIGH: Is this a terminal? Does it always have to be lower case? */
+ID_CODE_LEADER::='id'
+
+V_ARCHETYPE_ID::=({NAMESTR}(\.{ALPHANUM_STR})*::)?{NAMESTR}-{ALPHANUM_STR}-{NAMESTR}\.{NAMESTR}(-{ALPHANUM_STR})*\.v[0-9]+((\.[0-9]+){0,2}((-rc|\+u|\+)[0-9]+)?)?
+/*TODO, HIGH: Ask about this: This value needs the definition of code leader */
+V_CONCEPT_CODE::=
+
+V_VALUE::= VALUE_STR
+
+/* TODO, HIGH: These "values" require definition in separate files to make
+them clear*/
+V_CADL_TEXT::= 
+V_ODIN_TEXT
+V_RULES_TEXT
