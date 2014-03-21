@@ -146,9 +146,8 @@ c_object_tuples::= (c_object_tuple (SYM_COMA c_object_tuple)*)
 
 c_object_tuple::= '[' c_object_tuple_items ']'
 
-/* TODO: HIGH, Revise this */
-c_object_tuple_items::= SYM_START_CBLOCK c_primitive_object SYM_END_CBLOCK |
-                        c_object_tuple_items SYM_COMA SYM_START_CBLOCK c_primitive_object SYM_END_CBLOCK
+c_object_tuple_items::= (SYM_START_CBLOCK c_primitive_object SYM_END_CBLOCK) |
+                        (c_object_tuple_items SYM_COMA SYM_START_CBLOCK c_primitive_object SYM_END_CBLOCK)
 
 c_includes::= ANY | SYM_INCLUDE assertions
 
@@ -185,8 +184,7 @@ arithmetic_relop_expr::= arithmetic_node relational_binop_symbol arithmetic_node
 
 arithmetic_node::= arithmetic_leaf | arithmetic_arith_binop_expr
 
-/*TODO: HIGH, Revise the parentheses in the following line */
-arithmetic_leaf::= arithmetic_value | ( arithmetic_node )
+arithmetic_leaf::= arithmetic_value | '(' arithmetic_node ')'
 
 arithmetic_arith_binop_expr::= arithmetic_node arithmetic_binop_symbol arithmetic_leaf
 
@@ -404,7 +402,7 @@ duration_interval::= (SYM_INTERVAL_DELIM duration_value SYM_ELLIPSIS duration_va
                      (SYM_INTERVAL_DELIM duration_value SYM_INTERVAL_DELIM)
 
 duration_interval_list::= (duration_interval SYM_COMA duration_interval) |
-                          (duration_interval_list , duration_interval) |
+                          (duration_interval_list SYM_COMA duration_interval) |
                           (duration_interval SYM_COMA SYM_LIST_CONTINUE)
 
 uri_value::=V_URI
