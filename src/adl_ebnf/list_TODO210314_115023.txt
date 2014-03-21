@@ -1,0 +1,17 @@
+./cadl_1_5_outer.txt:376:/* TODO: Definitely possible to do some simplifications here */
+HIGH./adl_1_5_outer.txt:117:/*TODO:  Is this a terminal? Does it always have to be lower case? */
+HIGH./adl_1_5_outer.txt:121:/*TODO:  Ask about this: This value needs the definition of code leader */
+HIGH./adl_1_5_outer.txt:126:/* TODO:  These "values" require definition in separate files to make
+HIGH./cadl_1_5_outer.txt:125:/* TODO:  Revise the right way to declare the ANY here */
+HIGH./cadl_1_5_outer.txt:132:/* TODO:  What does the error mean here? */
+HIGH./cadl_1_5_outer.txt:141:/* TODO:  Square brackets to denote optional? */
+HIGH./cadl_1_5_outer.txt:150:/* TODO:  Revise this */
+HIGH./cadl_1_5_outer.txt:189:/*TODO:  Revise the parentheses in the following line */
+HIGH./cadl_1_5_outer.txt:244:/* TODO:  Do we need a symbol declaration for the forwrard slash here? */
+HIGH./cadl_1_5_outer.txt:255:              V_ISO8601_DURATION_CONSTRAINT_PATTERN_ERR /* TODO:  Is this refering to the error condition only? */
+HIGH./cadl_1_5_outer.txt:263:| ERR_VALUE_SET_MISSING_CODES /*TODO:  Are these simply marking the error conditions or are they parsable? */
+HIGH./cadl_1_5_outer.txt:46:/* TODO:  These need to be revised to conform with EBNF */
+HIGH./cadl_1_5_outer.txt:86:/* TODO:  Ask about this */
+MID./cadl_1_5_outer.txt:281:/* TODO:  We can definitely simplify these rules as [+-]? V_INTEGER */
+MID./cadl_1_5_outer.txt:302:/* TODO:  This can be simplified */
+MID./cadl_1_5_outer.txt:355:/* TODO:  We can definitely simplify these repetitions here */
