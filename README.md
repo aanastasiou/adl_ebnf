@@ -1,6 +1,14 @@
 openEHR ADL 1.5 in EBNF
 =======================
 
+Current progress (Last updated 24/03/2014):
+
+* Definitions are now available in ANTLR's metalanguage.
+* Please note: The project also includes a definition of AQL in EBNF 
+which was used primarily to generate syntax diagrams for that DSL.
+
+
+
 Background
 ----------
 The openEHR foundation (openehr.org) is producing a set of 
@@ -83,6 +91,3 @@ generic lambda functions.
 optimisations. However at this point it is best to express everything
 as simply as possible to first conclude with clear definitions for all
 classes.
-
-Please note: The project also includes a definition of AQL in EBNF 
-which was used primarily to generate syntax diagrams for that DSL.
