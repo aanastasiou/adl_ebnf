@@ -8,9 +8,6 @@ grammar cadl_15_outer;
 
 import adl_commonSymbols, cadl_15_symbols, cadl_15_valuedefs;
 
-     
-
-/* TODO: HIGH, Ask about this */
 cadl_definition             :c_complex_object|assertions;
 
 c_complex_object            :(c_complex_object_head SYM_MATCHES SYM_START_CBLOCK c_complex_object_body SYM_END_CBLOCK) | 
