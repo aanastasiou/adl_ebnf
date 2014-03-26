@@ -1,0 +1,30 @@
+HIGH./adl_15_commonValuedefs.g4:112:/* TODO:  First pattern to be removed when all archetypes with a leading T have gone according to cadl15 doc */
+HIGH./adl_15_commonValuedefs.g4:33:/*TODO:  Is this really a terminal? Does it always have to be lower case?
+HIGH./adl_15_commonValuedefs.g4:46:TODO:  need to clarify the definitions of these
+HIGH./adl_15_commonValuedefs.g4:60:/* TODO:  Need to clarify the definitions of these */
+HIGH./adl_15_commonValuedefs.g4:72:TODO:  Need to clarify the definition of V_REGEX here.
+HIGH./adl_15_commonValuedefs.g4:92:/*TODO:  According to the current CADL notes the first part of this def should be removed when archetypes with a missing 'T' have gone */
+HIGH./adl_15_commonValuedefs.g4:95:/*TODO:  Check the documentation about the note on the following definition, particularly for the '}' symbol*/
+HIGH./adl_15_symbols.g4:30:/* TODO:  All marked definitions in the following code fragment are supposed to have a '^' to denote start of string.*/
+HIGH./adl_15_valuedefs.g4:12:/*TODO:  Is this a terminal? Does it always have to be lower case? */
+HIGH./adl_15_valuedefs.g4:17:/*TODO:  Ask about this: This value needs the definition of code leader */
+HIGH./cadl_15_outer.g4:228:| ERR_VALUE_SET_MISSING_CODES /*TODO:  Are these simply marking the error conditions or are they parsable? */
+HIGH./cadl_15_outer.g4:244:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:252:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:267:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:274:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:289:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:296:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:303:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:318:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:325:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:340:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:347:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:362:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:369:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:384:TODO:  Simplify this list
+HIGH./cadl_15_outer.g4:81:TODO:  Simplify this list
+HIGH./cadl_15_valuedefs.g4:25:/* TODO:  A bit difficult to understand the definition of this */
+HIGH./cadl_15_valuedefs.g4:56:/*TODO:  According to the current CADL notes the first part of this def should be removed when archetypes with a missing 'T' have gone */
+HIGH./cadl_15_valuedefs.g4:59:/*TODO:  Check the documentation about the note on the following definition */
+HIGH./cadl_15_valuedefs.g4:77:/* TODO:  First pattern to be removed when all archetypes with a leading T have gone according to cadl15 doc */

@@ -1,12 +1,29 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- * Athanasios Anastasiou, Work in progress in defining ADL in antlr
+ The 'outer' definition of ADL 1.5, describing an openEHR archetype in human
+ readable text form. This document aims at providing a compact
+ description of the Archetype Definition Language in a form that it can be
+ re-usable by software in different programming languages, whether this is
+ achieved through an ANTLR target or 'simply' by transcribing the rules to
+ a different form.
+ 
+ Copyright (C) 2014  Athanasios Anastasiou
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 grammar adl_15_outer;
 
-import adl_commonSymbols, adl_15_symbols, adl_15_valuedefs;
+import adl_commonSymbols, adl_15_symbols, adl_15_commonValuedefs;
 
 /* Starting rule */
 archetype_definition                :archetype | specialised_archetype | template | 

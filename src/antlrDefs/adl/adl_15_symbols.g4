@@ -1,8 +1,29 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ The Archetype Definition Language (ADL) is 'split' into a set of different
+ specifications as described at: http://www.openehr.org/wiki/display/spec/ADL+1.5+parser+resources
+ It is composed of the constrain ADL (cADL) and data ADL (dADL or ODIN).
+ cADL is used to describe not only the structure of an archetype but also the 
+ semantics of different types. dADL or ODIN, is essentially a data format.
+ 
+ This document contains the lexical definitions of symbols required specifically
+ but the ADL 1.5 outer syntax (adl_15_outer.g4).
+ 
+ Copyright (C) 2014  Athanasios Anastasiou
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
 lexer grammar adl_15_symbols;
 
 SYM_ADL_VERSION                 :'adl_version'|'ADL_VERSION';

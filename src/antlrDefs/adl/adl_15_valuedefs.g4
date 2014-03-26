@@ -5,6 +5,8 @@
  */
 lexer grammar adl_15_valuedefs;
 
+import adl_commonSymbols, cadl_15_valuedefs;
+
 V_IDENTIFIER                        :NAMESTR;
 
 /*TODO: HIGH, Is this a terminal? Does it always have to be lower case? */

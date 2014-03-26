@@ -1,12 +1,31 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ The Archetype Definition Language (ADL) is 'split' into a set of different
+ specifications as described at: http://www.openehr.org/wiki/display/spec/ADL+1.5+parser+resources
+ It is composed of the constrain ADL (cADL) and data ADL (dADL or ODIN).
+ cADL is used to describe not only the structure of an archetype but also the 
+ semantics of different types. dADL or ODIN, is essentially a data format.
+ 
+ This document contains the definition of the 'outer' part of a cADL document.
+ 
+ Copyright (C) 2014  Athanasios Anastasiou
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 grammar cadl_15_outer;
 
-import adl_commonSymbols, cadl_15_symbols, cadl_15_valuedefs;
+import adl_15_commonSymbols, adl_15_commonValuedefs, cadl_15_symbols;
 
 cadl_definition             :c_complex_object|assertions;
 
@@ -57,10 +76,9 @@ c_primitive_object          :c_integer |
                              c_terminology_code | 
                              c_boolean;
 
-/* TODO: HIGH, Revise the right way to declare the ANY here */
 c_any                       :SYM_STAR;
 
-/* TODO: HIGH, Correct for a better definition of a list here */
+//TODO: HIGH, Simplify this list
 c_attribute_defs            :c_attribute_def | 
                              (c_attribute_defs c_attribute_def);
 
@@ -187,7 +205,6 @@ c_date_time                 :V_ISO8601_DATE_TIME_CONSTRAINT_PATTERN |
                              date_time_interval_list |
                              (c_date_time SYM_SEMI_COLON date_time_value);
                
-/* TODO: HIGH, Do we need a symbol declaration for the forwrard slash here? */
 c_duration                  :(V_ISO8601_DURATION_CONSTRAINT_PATTERN SYM_DIV duration_interval) |
                              (V_ISO8601_DURATION_CONSTRAINT_PATTERN SYM_DIV duration_value) |
                              V_ISO8601_DURATION_CONSTRAINT_PATTERN |
@@ -196,7 +213,6 @@ c_duration                  :(V_ISO8601_DURATION_CONSTRAINT_PATTERN SYM_DIV dura
                             duration_interval |
                             duration_interval_list|
                             (c_duration SYM_SEMI_COLON duration_value);
-//V_ISO8601_DURATION_CONSTRAINT_PATTERN_ERR /* TODO: HIGH, Is this refering to the error condition only? */
 
 c_string                    :V_STRING | 
                              string_list | 
@@ -225,14 +241,15 @@ type_identifier             :V_TYPE_IDENTIFIER | V_GENERIC_TYPE_IDENTIFIER;
 
 string_value                :V_STRING ;
 
+//TODO: HIGH, Simplify this list
 string_list                 :(V_STRING SYM_COMA V_STRING) | 
                              (string_list SYM_COMA V_STRING) |
                              (string_list SYM_COMA SYM_LIST_CONTINUE) |
                              (V_STRING SYM_COMA SYM_LIST_CONTINUE);
                
-/* TODO: MID, We can definitely simplify these rules as [+-]? V_INTEGER */
 integer_value               :SYM_SIGN? V_INTEGER;
 
+//TODO: HIGH, Simplify this list
 integer_list                :(integer_value SYM_COMA integer_value) |
                              (integer_list SYM_COMA integer_value) |
                              (integer_value SYM_COMA SYM_LIST_CONTINUE);
@@ -247,12 +264,14 @@ integer_interval            :(SYM_INTERVAL_DELIM integer_value SYM_ELLIPSIS inte
                              (SYM_INTERVAL_DELIM SYM_GE integer_value SYM_INTERVAL_DELIM) |
                              (SYM_INTERVAL_DELIM integer_value SYM_INTERVAL_DELIM);
                   
+//TODO: HIGH, Simplify this list
 integer_interval_list       :(integer_interval SYM_COMA integer_interval) |
                              (integer_interval_list SYM_COMA integer_interval)  |
                              (integer_interval SYM_COMA SYM_LIST_CONTINUE);
 
 real_value                  :SYM_SIGN? V_REAL;
 
+//TODO: HIGH, Simplify this list
 real_list                   :(real_value SYM_COMA real_value) |
                              (real_list SYM_COMA real_value) |
                              (real_value SYM_COMA SYM_LIST_CONTINUE);
@@ -267,18 +286,21 @@ real_interval               :(SYM_INTERVAL_DELIM real_value SYM_ELLIPSIS real_va
                              (SYM_INTERVAL_DELIM SYM_GE real_value SYM_INTERVAL_DELIM)
                              (SYM_INTERVAL_DELIM real_value SYM_INTERVAL_DELIM);
                  
+//TODO: HIGH, Simplify this list
 real_interval_list          :(real_interval SYM_COMA real_interval) |
                              (real_interval_list SYM_COMA real_interval) |
                              (real_interval SYM_COMA SYM_LIST_CONTINUE);
 
 boolean_value               :SYM_TRUE | SYM_FALSE;
 
+//TODO: HIGH, Simplify this list
 boolean_list                :(boolean_value SYM_COMA boolean_value) |
                              (boolean_list SYM_COMA boolean_value) |
                              (boolean_value SYM_COMA SYM_LIST_CONTINUE);
                 
 date_value                  :V_ISO8601_EXTENDED_DATE;
 
+//TODO: HIGH, Simplify this list
 date_list                   :(date_value SYM_COMA date_value) |
                              (date_list SYM_COMA date_value) |
                              (date_value SYM_COMA SYM_LIST_CONTINUE);
@@ -293,12 +315,14 @@ date_interval               :(SYM_INTERVAL_DELIM date_value SYM_ELLIPSIS date_va
                              (SYM_INTERVAL_DELIM SYM_GE date_value SYM_INTERVAL_DELIM) |
                              (SYM_INTERVAL_DELIM date_value SYM_INTERVAL_DELIM);
                  
+//TODO: HIGH, Simplify this list
 date_interval_list          :(date_interval SYM_COMA date_interval) |
                              (date_interval_list SYM_COMA date_interval) |
                              (date_interval SYM_COMA SYM_LIST_CONTINUE);
                       
 time_value                  :V_ISO8601_EXTENDED_TIME;
 
+//TODO: HIGH, Simplify this list
 time_list                   :(time_value SYM_COMA time_value) | 
                              (time_list SYM_COMA time_value) |
                              (time_value SYM_COMA SYM_LIST_CONTINUE);
@@ -313,12 +337,14 @@ time_interval               :(SYM_INTERVAL_DELIM time_value SYM_ELLIPSIS time_va
                              (SYM_INTERVAL_DELIM SYM_GE time_value SYM_INTERVAL_DELIM) |
                              (SYM_INTERVAL_DELIM time_value SYM_INTERVAL_DELIM);
                  
+//TODO: HIGH, Simplify this list
 time_interval_list          :(time_interval SYM_COMA time_interval) |
                              (time_interval_list SYM_COMA time_interval) |
                              (time_interval SYM_COMA SYM_LIST_CONTINUE);
                       
 date_time_value             :V_ISO8601_EXTENDED_DATE_TIME;
 
+//TODO: HIGH, Simplify this list
 date_time_list              :(date_time_value SYM_COMA date_time_value) |
                              (date_time_list SYM_COMA date_time_value) |
                              (date_time_value SYM_COMA SYM_LIST_CONTINUE);
@@ -333,12 +359,14 @@ date_time_interval          :(SYM_INTERVAL_DELIM date_time_value SYM_ELLIPSIS da
                              (SYM_INTERVAL_DELIM SYM_GE date_time_value SYM_INTERVAL_DELIM) |
                              (SYM_INTERVAL_DELIM date_time_value SYM_INTERVAL_DELIM);
                       
+//TODO: HIGH, Simplify this list
 date_time_interval_list     :(date_time_interval SYM_COMA date_time_interval) |
                              (date_time_interval_list SYM_COMA date_time_interval) |
                              (date_time_interval SYM_COMA SYM_LIST_CONTINUE);
                            
 duration_value              :V_ISO8601_DURATION;
 
+//TODO: HIGH, Simplify this list
 duration_list               :(duration_value SYM_COMA duration_value) |
                              (duration_list SYM_COMA duration_value) |
                              (duration_value SYM_COMA SYM_LIST_CONTINUE);
@@ -353,6 +381,7 @@ duration_interval           :(SYM_INTERVAL_DELIM duration_value SYM_ELLIPSIS dur
                              (SYM_INTERVAL_DELIM SYM_GE duration_value SYM_INTERVAL_DELIM) |
                              (SYM_INTERVAL_DELIM duration_value SYM_INTERVAL_DELIM);
 
+//TODO: HIGH, Simplify this list
 duration_interval_list      :(duration_interval SYM_COMA duration_interval) |
                              (duration_interval_list SYM_COMA duration_interval) |
                              (duration_interval SYM_COMA SYM_LIST_CONTINUE);
