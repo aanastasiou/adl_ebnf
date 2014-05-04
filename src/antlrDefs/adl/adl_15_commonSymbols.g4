@@ -51,4 +51,5 @@ SYM_DIV                 :'/';
 SYM_STAR                :'*';
 SYM_EXPON               :'^';
 SYM_DBQUOTE             :'"';
-SYM_SIGN                :(SYM_PLUS|SYM_MINUS);
+//SYM_SIGN                :(SYM_PLUS|SYM_MINUS);
+SYM_SIGN                :('+'|'-');

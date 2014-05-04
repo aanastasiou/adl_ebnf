@@ -35,7 +35,7 @@ Maybe it should become a SYM? */
 ID_CODE_LEADER                      :'id';
 
 IDCHAR                              :[a-zA-Z0-9_];
-VALUESTR                            :[a-zA-Z0-9._\-]+;
+VALUE_STR                            :[a-zA-Z0-9._\-]+;
 NAMESTR                             :([a-zA-Z][a-zA-Z0-9_]+);
 ALPHANUM_CHAR                       :[a-zA-Z0-9_]+;
 
@@ -72,8 +72,8 @@ V_REAL                          :([0-9]+ SYM_DOT [0-9]+) | ([0-9]+ SYM_DOT [0-9]
 //TODO: HIGH, Need to clarify the definition of V_REGEX here.
 V_REGEXP                        :SYM_DIV .*? SYM_DIV;
 V_REL_PATH                      :PATH_SEG (SYM_DIV PATH_SEG)+; 
-V_ROOT_ID_CODE                  :SYM_START_SBLOCK ID_CODE_LEADER '1' (SYM_DOT 1)* SYM_END_SBLOCK;
-V_SLOT_FILLER                   :SYM_START_SBLOCK ID_CODE[ \t]*,[ \t]*ARCHETYPE_ID SYM_END_SBLOCK;
+V_ROOT_ID_CODE                  :SYM_START_SBLOCK ID_CODE_LEADER '1' (SYM_DOT '1')* SYM_END_SBLOCK;
+V_SLOT_FILLER                   :SYM_START_SBLOCK ID_CODE[ \t]*','[ \t]*ARCHETYPE_ID SYM_END_SBLOCK;
 V_STRING                        :SYM_DBQUOTE ([^\\\n]|SYM_DBQUOTE)* SYM_DBQUOTE;
 V_TYPE_IDENTIFIER               :([A-Z] IDCHAR*);
 V_URI                           :[a-z]+ (SYM_COLON SYM_DIV SYM_DIV) [^<>|\\{}^~"\[\] ]*;
@@ -107,7 +107,7 @@ V_ISO8601_EXTENDED_DATE_TIME            :([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS 
 //                               ([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-6][0-9](Z|[+-][0-9]{4})?) |
 //                               ([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9](Z|[+-][0-9]{4})?)
 
-V_ISO8601_EXTENDED_TIME                 :([0-2][0-9] SYM_COLON [0-6][0-9] SYM_COLON [0-6][0-9]([\.,][0-9]+)?('Z'|[+-][0-9]{4})?) | ([0-2][0-9] SYM_COLON [0-6][0-9]('Z'|[+-][0-9]{4})?)
+V_ISO8601_EXTENDED_TIME                 :([0-2][0-9] SYM_COLON [0-6][0-9] SYM_COLON [0-6][0-9]([\.,][0-9]+)?('Z'|[+-][0-9]{4})?) | ([0-2][0-9] SYM_COLON [0-6][0-9]('Z'|[+-][0-9]{4})?);
 
 /* TODO: HIGH, First pattern to be removed when all archetypes with a leading T have gone according to cadl15 doc */
 V_ISO8601_TIME_CONSTRAINT_PATTERN       :('T'[hH][hH] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]) | ([hH][hH] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]);

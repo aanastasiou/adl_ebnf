@@ -5,7 +5,7 @@
  */
 grammar cadl_15_valuedefs;
 
-import adl_commonSymbols;
+import adl_15_commonSymbols;
 
 IDCHAR                          :[a-zA-Z0-9_];
 VALUESTR                        :[a-zA-Z0-9._\-]+;
