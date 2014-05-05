@@ -36,8 +36,8 @@ V_INTEGER                       :([0-9]+) | [0-9]+ (SYM_COMA [0-9]+)+;
 V_REAL                          :([0-9]+ SYM_DOT [0-9]+) | ([0-9]+ SYM_DOT [0-9]+[eE][+-]?[0-9]+);
 //V_REGEXP                    :PATH_SEG ('/' PATH_SEG)+;
 V_REL_PATH                      :PATH_SEG ('/' PATH_SEG)+; 
-V_ROOT_ID_CODE                  :SYM_START_SBLOCK ID_CODE_LEADER '1' (SYM_DOT 1)* SYM_END_SBLOCK;
-V_SLOT_FILLER                   :SYM_START_SBLOCK ID_CODE[ \t]*,[ \t]*ARCHETYPE_ID SYM_END_SBLOCK;
+V_ROOT_ID_CODE                  :SYM_START_SBLOCK ID_CODE_LEADER '1' (SYM_DOT '1')* SYM_END_SBLOCK;
+V_SLOT_FILLER                   :SYM_START_SBLOCK ID_CODE[ \t]*','[ \t]*ARCHETYPE_ID SYM_END_SBLOCK;
 V_STRING                        :SYM_DBQUOTE ([^\\\n]|SYM_DBQUOTE)* SYM_DBQUOTE;
 V_TYPE_IDENTIFIER               :([A-Z] IDCHAR*);
 V_URI                           :[a-z]+ (SYM_COLON SYM_DIV SYM_DIV) [^<>|\\{}^~"\[\] ]*;
@@ -57,7 +57,7 @@ V_ISO8601_DATE_CONSTRAINT_PATTERN       :[yY][yY][yY][yY] SYM_MINUS [mM?X][mM?X]
 V_ISO8601_DATE_TIME_CONSTRAINT_PATTERN  :([yY][yY][yY][yY] SYM_MINUS [mM?][mM?] SYM_MINUS [dD?X][dD?X][ ][hH?X][hH?X] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X])|([yY][yY][yY][yY] SYM_MINUS [mM?][mM?] SYM_MINUS [dD?X][dD?X]'T'[hH?X][hH?X] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]);
 
 /*TODO: HIGH, Check the documentation about the note on the following definition */
-V_ISO8601_DURATION_CONSTRAINT_PATTERN   :('P'[yY]?[mM]?[Ww]?[dD]?('T'[hH]?[mM]?[sS]?)?\/\})|('P'[yY]?[mM]?[Ww]?[dD]?('T'[hH]?[mM]?[sS]?)?);
+V_ISO8601_DURATION_CONSTRAINT_PATTERN   :('P'[yY]?[mM]?[Ww]?[dD]?('T'[hH]?[mM]?[sS]?)?)|('P'[yY]?[mM]?[Ww]?[dD]?('T'[hH]?[mM]?[sS]?)?);
 
 V_ISO8601_EXTENDED_DATE                 :([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS [0-3][0-9]) | ([0-9]+ SYM_MINUS [0-1][0-9]);
 //ORIGINAL DEFINITION:

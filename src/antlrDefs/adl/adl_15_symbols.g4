@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
 lexer grammar adl_15_symbols;
 
-SYM_ADL_VERSION                 :'adl_version'|'ADL_VERSION';
 /* TODO: HIGH, All marked definitions in the following code fragment are supposed to have a '^' to denote start of string.*/
+SYM_ADL_VERSION                 :'adl_version'|'ADL_VERSION';
 SYM_ANNOTATIONS                 :('annotations'|'ANNOTATIONS'); /*Mark*/
 SYM_ARCHETYPE                   :('archetype'|'ARCHETYPE'); /*Mark*/
 SYM_COMPONENT_TERMINOLOGIES     :'component_terminologies' | 'COMPONENT_TERMINOLOGIES';

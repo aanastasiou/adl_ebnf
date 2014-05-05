@@ -34,14 +34,22 @@ import adl_15_commonSymbols;
 Maybe it should become a SYM? */
 ID_CODE_LEADER                      :'id';
 
+CODE_STR                            :([0]|[1-9][0-9]*)('.'([0]|[1-9][0-9]*))*;
+ID_CODE                             :ID_CODE_LEADER CODE_STR;
+AT_CODE                             :'at' CODE_STR;
+AC_CODE                             :'ac' CODE_STR;
+
+
 IDCHAR                              :[a-zA-Z0-9_];
-VALUE_STR                            :[a-zA-Z0-9._\-]+;
+VALUE_STR                           :[a-zA-Z0-9._\-]+;
 NAMESTR                             :([a-zA-Z][a-zA-Z0-9_]+);
 ALPHANUM_CHAR                       :[a-zA-Z0-9_]+;
 
 V_IDENTIFIER                        :NAMESTR;
 V_CONCEPT_CODE                      :SYM_START_SBLOCK ID_CODE_LEADER '1' (SYM_DOT '1')* SYM_END_SBLOCK;
 V_VALUE                             :VALUE_STR;
+DOTTED_NUMERIC_STR                  :[0-9]+ SYM_DOT [0-9]+ (SYM_DOT [0-9]+)*;
+V_DOTTED_NUMERIC                    :DOTTED_NUMERIC_STR;
 
 //TODO: HIGH, need to clarify the definitions of these
 V_CADL_TEXT                         : .*?; 
@@ -50,6 +58,7 @@ V_RULES_TEXT                        : .*?;
 
 
 ARCHETYPE_ID                        :(NAMESTR(SYM_DOT ALPHANUM_CHAR)* SYM_COLON SYM_COLON)? NAMESTR SYM_MINUS ALPHANUM_CHAR SYM_MINUS NAMESTR SYM_DOT NAMESTR (SYM_MINUS ALPHANUM_CHAR)* SYM_DOT 'v'[0-9]+((SYM_DOT [0-9]+)*((SYM_MINUS [rc]| SYM_PLUS 'u'|SYM_PLUS)[0-9]+)?)?;
+V_ARCHETYPE_ID                      :ARCHETYPE_ID;
 //ORIGINAL DEFINITION:
 //ARCHETYPE_ID::=({NAMESTR}(\.{ALPHANUM_STR})*::)?{NAMESTR}-{ALPHANUM_STR}-{NAMESTR}\.{NAMESTR}(-{ALPHANUM_STR})*\.v[0-9]+((\.[0-9]+){0,2}((-rc|\+u|\+)[0-9]+)?)?
 PATH_SEG                        :([a-z] ALPHANUM_CHAR)* (SYM_START_SBLOCK (ID_CODE|ARCHETYPE_ID) SYM_END_SBLOCK)?;
@@ -107,7 +116,7 @@ V_ISO8601_EXTENDED_DATE_TIME            :([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS 
 //                               ([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-6][0-9](Z|[+-][0-9]{4})?) |
 //                               ([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9](Z|[+-][0-9]{4})?)
 
-V_ISO8601_EXTENDED_TIME                 :([0-2][0-9] SYM_COLON [0-6][0-9] SYM_COLON [0-6][0-9]([\.,][0-9]+)?('Z'|[+-][0-9]{4})?) | ([0-2][0-9] SYM_COLON [0-6][0-9]('Z'|[+-][0-9]{4})?);
+V_ISO8601_EXTENDED_TIME                 :([0-2][0-9] SYM_COLON [0-6][0-9] SYM_COLON [0-6][0-9]([\.,][0-9]+)?('Z'|[+-][0-9]+)?) | ([0-2][0-9] SYM_COLON [0-6][0-9]('Z'|[+-][0-9]+)?);
 
 /* TODO: HIGH, First pattern to be removed when all archetypes with a leading T have gone according to cadl15 doc */
 V_ISO8601_TIME_CONSTRAINT_PATTERN       :('T'[hH][hH] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]) | ([hH][hH] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]);

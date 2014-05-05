@@ -23,13 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 grammar adl_15_outer;
 
-import adl_commonSymbols, adl_15_symbols, adl_15_commonValuedefs;
+import adl_15_commonSymbols, adl_15_symbols, adl_15_commonValuedefs;
 
 /* Starting rule */
-archetype_definition                :archetype | specialised_archetype | template | 
-                                    template_overlay | operational_template | 
-                                    transitional_archetype | 
-                                    transitional_specialised_archetype;
+archetype_definition                :archetype 
+                                    |specialised_archetype
+                                    |template
+                                    |template_overlay
+                                    |operational_template
+                                    |transitional_archetype
+                                    |transitional_specialised_archetype;
 
 archetype                           :SYM_ARCHETYPE arch_meta_data archetype_id arch_language arch_description arch_definition arch_rules arch_terminology arch_annotations;
             
@@ -47,19 +50,19 @@ transitional_specialised_archetype  :SYM_ARCHETYPE arch_meta_data archetype_id a
                                        
 arch_concept                        :SYM_CONCEPT V_CONCEPT_CODE | SYM_CONCEPT;
 
-arch_meta_data                      :|arch_meta_data_items;
+arch_meta_data                      :|(SYM_START_PBLOCK arch_meta_data_items SYM_END_PBLOCK);
 
 arch_meta_data_items                :arch_meta_data_item (SYM_SEMI_COLON arch_meta_data_item)*;
 
-arch_meta_data_item                 :(SYM_ADL_VERSION SYM_EQ V_DOTTED_NUMERIC) |
-                                     (SYM_UID SYM_EQ V_DOTTED_NUMERIC) | 
-                                     (SYM_UID SYM_EQ V_VALUE) |
-                                     SYM_IS_CONTROLLED |
-                                     SYM_IS_GENERATED |
-                                     (V_IDENTIFIER SYM_EQ V_IDENTIFIER) |
-                                     (V_IDENTIFIER SYM_EQ V_VALUE) |
-                                     V_IDENTIFIER |
-                                     V_VALUE;
+arch_meta_data_item                 :(SYM_ADL_VERSION SYM_EQ V_DOTTED_NUMERIC) 
+                                    |(SYM_UID SYM_EQ V_DOTTED_NUMERIC)
+                                    |(SYM_UID SYM_EQ V_VALUE)
+                                    |SYM_IS_CONTROLLED
+                                    |SYM_IS_GENERATED
+                                    |(V_IDENTIFIER SYM_EQ V_IDENTIFIER)
+                                    |(V_IDENTIFIER SYM_EQ V_VALUE)
+                                    |V_IDENTIFIER
+                                    |V_VALUE;
 
 arch_specialisation                 :SYM_SPECIALIZE V_ARCHETYPE_ID;
 
@@ -75,3 +78,7 @@ arch_annotations                    :|(SYM_ANNOTATIONS V_ODIN_TEXT);
 arch_component_terminologies        :SYM_COMPONENT_TERMINOLOGIES V_ODIN_TEXT;
 
 archetype_id                        :V_ARCHETYPE_ID;
+
+//NOTE: Skipping whitespace is left as a rule in each file in case whitespace
+//gets to be treated differently depending on file type.
+WS:[\t\r\n ]+ -> skip;
