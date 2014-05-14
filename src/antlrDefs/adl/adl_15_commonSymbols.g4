@@ -51,5 +51,17 @@ SYM_DIV                 :'/';
 SYM_STAR                :'*';
 SYM_EXPON               :'^';
 SYM_DBQUOTE             :'"';
-//SYM_SIGN                :(SYM_PLUS|SYM_MINUS);
+SYM_UNDER               :'_';
+SYM_SPACE               :' ';
+
+SYM_ID                  :'id';
+SYM_AT                  :'at';
+SYM_AC                  :'ac';
+
 SYM_SIGN                :('+'|'-');
+
+//Larger character classes
+UALPHA                  :[A-Z];
+LALPHA                  :[a-z];
+NUM                     :[1-9];
+//ONUM                    :[1-9];
