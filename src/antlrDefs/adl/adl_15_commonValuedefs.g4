@@ -29,28 +29,39 @@ grammar adl_15_commonValuedefs;
 
 import adl_15_commonSymbols;
 
-CODE_STR                              :('0' (SYM_DOT '0')*);//| ((NUM (NUM|'0')*) (SYM_DOT (NUM (NUM|'0')*))*);
-ID_CODE                               :SYM_ID CODE_STR;
-AT_CODE                               :SYM_AT CODE_STR;
-AC_CODE                               :SYM_AC CODE_STR;
+genericDotNum                         :(SYM_DOT NUM+)*;
+genericDotNumList                     :NUM+ genericDotNum;
 
-V_IDENTIFIER                          :((LALPHA|UALPHA) (LALPHA|UALPHA|UNDER|NUM)*);
-V_CONCEPT_CODE                        :SYM_START_SBLOCK SYM_ID '1' (SYM_DOT '1')* SYM_END_SBLOCK;
-V_VALUE                               :(LALPHA|UALPHA|NUM|SYM_DOT|SYM_UNDER|SYM_MINUS|SYM_PLUS)+;
-V_DOTTED_NUMERIC                      :(NUM+ SYM_DOT NUM+) (SYM_DOT NUM+)*;
+//NOTE: genericDotNumList stands in as a replacement to the original definition's CODE_STR::=(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*
+id_code                               :SYM_ID genericDotNumList;
+at_code                               :SYM_AT genericDotNumList;
+ac_code                               :SYM_AC genericDotNumList;
 
-v:V_DOTTED_NUMERIC;
+
+alphanum_char                         :(LALPHA|UALPHA|SYM_UNDER|NUM);
+identifier                            :(LALPHA|UALPHA) alphanum_char*;
+v_identifier                          :identifier (SYM_DOT identifier)*;
+
+//NOTE: genericDotNumList stands in as a replacement to the original definition "... SYM_ID '1' (SYM_DOT '1')*..."
+v_concept_code                        :SYM_START_SBLOCK SYM_ID genericDotNumList SYM_END_SBLOCK;
+//v_value                               :(LALPHA|UALPHA|NUM|SYM_DOT|SYM_UNDER|SYM_MINUS|SYM_PLUS)+;
+v_dotted_numeric                      :genericDotNumList;
+
+//NOTE: In the original definition V_INTEGER::=([0-9]+) | ([0-9]{1,3}(,[0-9]{3})+);
+v_integer                             :NUM+ | (NUM+ (SYM_COMA NUM+)+);
+
+//NOTE: In the original definition -->"...((\.[0-9]+){0,2}((-rc|\+u|\+)[0-9]+)?"
+v_archetype_id                        :(v_identifier SYM_COLON SYM_COLON)? identifier SYM_MINUS identifier SYM_MINUS identifier SYM_DOT identifier (SYM_MINUS identifier)* SYM_DOT 'v' NUM+ (genericDotNum ((SYM_MINUS 'r'|'c'| SYM_PLUS 'u'|SYM_PLUS) NUM+)?)?;
+
 
 //TODO: HIGH, need to clarify the definitions of these
-//V_CADL_TEXT                         : .*?; 
-//V_ODIN_TEXT                         : .*?;
-//V_RULES_TEXT                        : .*?;
+V_CADL_TEXT                         : .*?; 
+V_ODIN_TEXT                         : .*?;
+V_RULES_TEXT                        : .*?;
+
+//v_real                                :(NUM+ SYM_DOT NUM+) | (NUM* SYM_DOT NUM+ ('e'|'E') ('+'|'-')?NUM+);
 
 
-//ARCHETYPE_ID                        :(NAMESTR(SYM_DOT ALPHANUM_CHAR)* SYM_COLON SYM_COLON)? NAMESTR SYM_MINUS ALPHANUM_CHAR SYM_MINUS NAMESTR SYM_DOT NAMESTR (SYM_MINUS ALPHANUM_CHAR)* SYM_DOT 'v'[0-9]+((SYM_DOT [0-9]+)*((SYM_MINUS [rc]| SYM_PLUS 'u'|SYM_PLUS)[0-9]+)?)?;
-//V_ARCHETYPE_ID                      :ARCHETYPE_ID;
-//ORIGINAL DEFINITION:
-//ARCHETYPE_ID::=({NAMESTR}(\.{ALPHANUM_STR})*::)?{NAMESTR}-{ALPHANUM_STR}-{NAMESTR}\.{NAMESTR}(-{ALPHANUM_STR})*\.v[0-9]+((\.[0-9]+){0,2}((-rc|\+u|\+)[0-9]+)?)?
 //PATH_SEG                        :([a-z] ALPHANUM_CHAR)* (SYM_START_SBLOCK (ID_CODE|ARCHETYPE_ID) SYM_END_SBLOCK)?;
 
 //V_ABS_PATH                      :(SYM_DIV PATH_SEG)+;
@@ -63,11 +74,8 @@ v:V_DOTTED_NUMERIC;
 //V_EXT_REF                       :SYM_START_SBLOCK ARCHETYPE_ID SYM_END_SBLOCK;
 //V_GENERIC_TYPE_IDENTIFIER       :[A-Z] IDCHAR* SYM_LT [a-zA-Z0-9,_\<\>]+ SYM_GT;
 //V_ID_CODE                       :SYM_START_SBLOCK ID_CODE SYM_END_SBLOCK;
-//V_INTEGER                       :([0-9]+) | ([0-9]+ (SYM_COMA [0-9]+)+);
-//ORIGINAL DEFINITION:
-//V_INTEGER::=([0-9]+) | ([0-9]{1,3}(,[0-9]{3})+);
 
-//V_REAL                          :([0-9]+ SYM_DOT [0-9]+) | ([0-9]+ SYM_DOT [0-9]+[eE][+-]?[0-9]+);
+
 //TODO: HIGH, Need to clarify the definition of V_REGEX here.
 //V_REGEXP                        :SYM_DIV .*? SYM_DIV;
 //V_REL_PATH                      :PATH_SEG (SYM_DIV PATH_SEG)+; 

@@ -63,5 +63,5 @@ SYM_SIGN                :('+'|'-');
 //Larger character classes
 UALPHA                  :[A-Z];
 LALPHA                  :[a-z];
-NUM                     :[1-9];
-//ONUM                    :[1-9];
+NUM                     :ONUM|'0';
+ONUM                    :[1-9];
