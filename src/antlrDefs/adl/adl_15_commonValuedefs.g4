@@ -55,32 +55,33 @@ v_archetype_id                        :(v_identifier SYM_COLON SYM_COLON)? ident
 
 
 //TODO: HIGH, need to clarify the definitions of these
-V_CADL_TEXT                         : .*?; 
-V_ODIN_TEXT                         : .*?;
-V_RULES_TEXT                        : .*?;
+//V_CADL_TEXT                         : .*?; 
+//V_ODIN_TEXT                         : .*?
+//V_RULES_TEXT                        : .*?;
 
 //v_real                                :(NUM+ SYM_DOT NUM+) | (NUM* SYM_DOT NUM+ ('e'|'E') ('+'|'-')?NUM+);
 
 
-//PATH_SEG                        :([a-z] ALPHANUM_CHAR)* (SYM_START_SBLOCK (ID_CODE|ARCHETYPE_ID) SYM_END_SBLOCK)?;
+path_seg                               :identifier (SYM_START_SBLOCK (id_code|v_archetype_id) SYM_END_SBLOCK)?;
 
-//V_ABS_PATH                      :(SYM_DIV PATH_SEG)+;
-//V_ATTRIBUTE_IDENTIFIER          :[a-z] IDCHAR*;
+v_abs_path                             :(SYM_DIV path_seg)+;
+v_attribute_identifier                 :LALPHA alphanum_char*;
 
 /* TODO: HIGH, Need to clarify the definitions of these */
 //V_EXPANDED_VALUE_SET_DEF::=
 //V_EXTERNAL_VALUE_SET_DEF
 
-//V_EXT_REF                       :SYM_START_SBLOCK ARCHETYPE_ID SYM_END_SBLOCK;
-//V_GENERIC_TYPE_IDENTIFIER       :[A-Z] IDCHAR* SYM_LT [a-zA-Z0-9,_\<\>]+ SYM_GT;
-//V_ID_CODE                       :SYM_START_SBLOCK ID_CODE SYM_END_SBLOCK;
+v_ext_ref                              :SYM_START_SBLOCK v_archetype_id SYM_END_SBLOCK;
+v_generic_type_identifier              :identifier SYM_LT (LALPHA|UALPHA|NUM|SYM_UNDER|SYM_COMA|SYM_LT|SYM_GT)+ SYM_GT;
+v_id_code                              :SYM_START_SBLOCK id_code SYM_END_SBLOCK;
 
 
-//TODO: HIGH, Need to clarify the definition of V_REGEX here.
+//TODO: HIGH, v_regexp is to be expressed with antlr modes.
 //V_REGEXP                        :SYM_DIV .*? SYM_DIV;
-//V_REL_PATH                      :PATH_SEG (SYM_DIV PATH_SEG)+; 
-//V_ROOT_ID_CODE                  :SYM_START_SBLOCK ID_CODE_LEADER '1' (SYM_DOT '1')* SYM_END_SBLOCK;
-//V_SLOT_FILLER                   :SYM_START_SBLOCK ID_CODE[ \t]*','[ \t]*ARCHETYPE_ID SYM_END_SBLOCK;
+v_rel_path                             :path_seg v_abs_path; 
+//NOTE: In the original definition, the dotnumlist is a 1(.1)*
+v_root_id_code                         :SYM_START_SBLOCK SYM_ID genericDotNumList SYM_END_SBLOCK;
+v_slot_filler                          :SYM_START_SBLOCK id_code SYM_COMA v_archetype_id SYM_END_SBLOCK;
 //V_STRING                        :SYM_DBQUOTE ([^\\\n]|SYM_DBQUOTE)* SYM_DBQUOTE;
 //V_TYPE_IDENTIFIER               :([A-Z] IDCHAR*);
 //V_URI                           :[a-z]+ (SYM_COLON SYM_DIV SYM_DIV) [^<>|\\{}^~"\[\] ]*;
@@ -93,6 +94,7 @@ V_RULES_TEXT                        : .*?;
 
 
 //ISO8601 Related defs
+v_iso8601_duration              :('P'(NUM+ 'y'|'Y')? (NUM+ 'm'|'M')? (NUM+ 'w'|'W')? (NUM+ 'd'|'D')? 'T' (NUM+ 'h'|'H')? (NUM+ 'm'|'M')? (NUM+ ('.'|',' NUM+)? 's'|'S')?) | ('P' (NUM+ 'y'|'Y')? (NUM+ 'm'|'M')? (NUM+ 'w'|'W')? (NUM+ 'd'|'D')?);
 //V_ISO8601_DURATION              :('P'([0-9]+[yY])?([0-9]+[mM])?([0-9]+[wW])?([0-9]+[dD])?'T'([0-9]+[hH])?([0-9]+[mM])?([0-9]+([\.,][0-9]+)?[sS])?) | ('P'([0-9]+[yY])?([0-9]+[mM])?([0-9]+[wW])?([0-9]+[dD])?);
 //V_ISO8601_DATE_CONSTRAINT_PATTERN       :[yY][yY][yY][yY] SYM_MINUS [mM?X][mM?X] SYM_MINUS [dD?X][dD?X];
 
