@@ -82,7 +82,7 @@ v_rel_path                             :path_seg v_abs_path;
 //NOTE: In the original definition, the dotnumlist is a 1(.1)*
 v_root_id_code                         :SYM_START_SBLOCK SYM_ID genericDotNumList SYM_END_SBLOCK;
 v_slot_filler                          :SYM_START_SBLOCK id_code SYM_COMA v_archetype_id SYM_END_SBLOCK;
-//V_STRING                        :SYM_DBQUOTE ([^\\\n]|SYM_DBQUOTE)* SYM_DBQUOTE;
+v_string                               :SYM_DBQUOTE ~('\n'|'\\'|SYM_DBQUOTE)* SYM_DBQUOTE;
 //V_TYPE_IDENTIFIER               :([A-Z] IDCHAR*);
 //V_URI                           :[a-z]+ (SYM_COLON SYM_DIV SYM_DIV) [^<>|\\{}^~"\[\] ]*;
 //ORIGINAL DEFINITION
@@ -92,32 +92,27 @@ v_slot_filler                          :SYM_START_SBLOCK id_code SYM_COMA v_arch
 //V_VALUE_SET_REF_ASSUMED         :SYM_START_SBLOCK AC_CODE [ \t]* SYM_SEMI_COLON [ \t]* AT_CODE SYM_END_SBLOCK;
 //V_VALUE_SET_REF                 :SYM_START_SBLOCK AC_CODE SYM_END_SBLOCK;
 
+v_iso8601_duration                     :('P'(NUM+ ('y'|'Y'))? (NUM+ ('m'|'M'))? (NUM+ ('w'|'W'))? (NUM+ ('d'|'D'))? 'T' (NUM+ ('h'|'H'))? (NUM+ ('m'|'M'))? (NUM+ (('.'|',') NUM+)? ('s'|'S'))?) | ('P' (NUM+ ('y'|'Y'))? (NUM+ ('m'|'M'))? (NUM+ ('w'|'W'))? (NUM+ ('d'|'D'))?);
 
-//ISO8601 Related defs
-v_iso8601_duration              :('P'(NUM+ 'y'|'Y')? (NUM+ 'm'|'M')? (NUM+ 'w'|'W')? (NUM+ 'd'|'D')? 'T' (NUM+ 'h'|'H')? (NUM+ 'm'|'M')? (NUM+ ('.'|',' NUM+)? 's'|'S')?) | ('P' (NUM+ 'y'|'Y')? (NUM+ 'm'|'M')? (NUM+ 'w'|'W')? (NUM+ 'd'|'D')?);
-//V_ISO8601_DURATION              :('P'([0-9]+[yY])?([0-9]+[mM])?([0-9]+[wW])?([0-9]+[dD])?'T'([0-9]+[hH])?([0-9]+[mM])?([0-9]+([\.,][0-9]+)?[sS])?) | ('P'([0-9]+[yY])?([0-9]+[mM])?([0-9]+[wW])?([0-9]+[dD])?);
-//V_ISO8601_DATE_CONSTRAINT_PATTERN       :[yY][yY][yY][yY] SYM_MINUS [mM?X][mM?X] SYM_MINUS [dD?X][dD?X];
+v_iso8601_date_constraint_pattern      :('y'|'Y') ('y'|'Y') SYM_MINUS ('m'|'M'|'X'|'?') ('m'|'M'|'X'|'?') SYM_MINUS ('d'|'D'|'?'|'X') ('d'|'D'|'?'|'X');
 
-/*TODO: HIGH, According to the current CADL notes the first part of this def should be removed when archetypes with a missing 'T' have gone */
-//V_ISO8601_DATE_TIME_CONSTRAINT_PATTERN  :([yY][yY][yY][yY] SYM_MINUS [mM?][mM?] SYM_MINUS [dD?X][dD?X][ ][hH?X][hH?X] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X])|([yY][yY][yY][yY] SYM_MINUS [mM?][mM?] SYM_MINUS [dD?X][dD?X]'T'[hH?X][hH?X] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]);
+//NOTE: This is the final form without taking into account the "archetypes with a missing 'T'" as specified at https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L495
+v_iso8601_date_time_constraint_pattern :('y'|'Y') ('y'|'Y') ('y'|'Y') ('y'|'Y') SYM_MINUS ('m'|'M'|'?') ('m'|'M'|'?') SYM_MINUS ('d'|'D'|'?'|'X') ('d'|'D'|'?'|'X') 'T' ('h'|'H'|'?'|'X') ('h'|'H'|'?'|'X') SYM_COLON ('m'|'M'|'?'|'X') ('m'|'M'|'?'|'X') SYM_COLON ('s'|'S'|'?'|'X') ('s'|'S'|'?'|'X');
 
-/*TODO: HIGH, Check the documentation about the note on the following definition, particularly for the '}' symbol*/
-//V_ISO8601_DURATION_CONSTRAINT_PATTERN   :('P'[yY]?[mM]?[Ww]?[dD]?('T'[hH]?[mM]?[sS]?)? SYM_DIV)|('P'[yY]?[mM]?[Ww]?[dD]?('T'[hH]?[mM]?[sS]?)?);
+//NOTE: Includes openEHR deviation from iso8601 as per https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L512
+v_iso8601_duration_constraint_pattern  :'P' ('y'|'Y')? ('m'|'M')? ('w'|'W')? ('d'|'D')? ('T' ('h'|'H')? ('m'|'M')? ('s'|'S')?)?; 
 
-//V_ISO8601_EXTENDED_DATE                 :([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS [0-3][0-9]) | ([0-9]+ SYM_MINUS [0-1][0-9]);
-//ORIGINAL DEFINITION:
-//V_ISO8601_EXTENDED_DATE::=([0-9]{4} SYM_MINUS [0-1][0-9] SYM_MINUS [0-3][0-9]) | ([0-9]{4} SYM_MINUS [0-1][0-9]);
+//NOTE: In the original definition, some of the NUM+ are actually [0-9]{4} as per https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L441
+v_iso8601_extended_date                :(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM)) 
+                                       |(NUM+ SYM_MINUS ('0'|'1') NUM);
 
-//V_ISO8601_EXTENDED_DATE_TIME            :([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS [0-3][0-9]'T'[0-2][0-9] SYM_COLON [0-6][0-9] SYM_COLON [0-6][0-9]([\.,][0-9]+)?('Z'|[+-][0-9]+)?) |
-//                                         ([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS [0-3][0-9]'T'[0-2][0-9] SYM_COLON [0-6][0-9]('Z'|[+-][0-9]+)?) |
-//                                         ([0-9]+ SYM_MINUS [0-1][0-9] SYM_MINUS [0-3][0-9]'T'[0-2][0-9]('Z'|[+-][0-9]+)?);
-//ORIGINAL DEFINITION:
-//V_ISO8601_EXTENDED_DATE_TIME::=([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-6][0-9]:[0-6][0-9]([\.,][0-9]+)?(Z|[+-][0-9]{4})?) |
-//                               ([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-6][0-9](Z|[+-][0-9]{4})?) |
-//                               ([0-9]{4}-[0-1][0-9]-[0-3][0-9]T[0-2][0-9](Z|[+-][0-9]{4})?)
+//NOTE: In the original definition some of the NUM+ are actually further constrained (e.g. {4}) as per https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L424
+v_iso8601_extended_date_time           :(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM) 'T' (('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) (('.'|',') NUM+)? ('Z'|(('+'|'-') NUM+))?)
+                                       |(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM) 'T' (('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) ('Z'|(('+'|'-') NUM+))?)
+                                       |(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM) 'T' (('0'|'1'|'2') NUM) ('Z'|(('+'|'-') NUM+))?);
 
-//V_ISO8601_EXTENDED_TIME                 :([0-2][0-9] SYM_COLON [0-6][0-9] SYM_COLON [0-6][0-9]([\.,][0-9]+)?('Z'|[+-][0-9]+)?) | ([0-2][0-9] SYM_COLON [0-6][0-9]('Z'|[+-][0-9]+)?);
+v_iso8601_extended_time                :((('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) (('.'|',') NUM+)? ('Z'|(('+'|'-') NUM+))?) 
+                                       |((('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM)('Z'|(('+'|'-') NUM+))?);
 
-/* TODO: HIGH, First pattern to be removed when all archetypes with a leading T have gone according to cadl15 doc */
-//V_ISO8601_TIME_CONSTRAINT_PATTERN       :('T'[hH][hH] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]) | ([hH][hH] SYM_COLON [mM?X][mM?X] SYM_COLON [sS?X][sS?X]);
-
+//NOTE: This is the final form without taking into account "archetype with a missing 'T'" as specified at https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L472
+v_iso8601_time_constraint_patter       :('h'|'H') ('h'|'H') SYM_COLON ('m'|'M'|'?'|'X') ('m'|'M'|'?'|'X') SYM_COLON ('s'|'S'|'?'|'X') ('s'|'S'|'?'|'X');
