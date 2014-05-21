@@ -29,13 +29,13 @@ grammar adl_15_commonValuedefs;
 
 import adl_15_commonSymbols;
 
-genericDotNum                         :(SYM_DOT NUM+)*;
-genericDotNumList                     :NUM+ genericDotNum;
+//genericDotNum                         :(SYM_DOT NUM+);
+//genericDotNumList                     :NUM+ genericDotNum*;
 
 //NOTE: genericDotNumList stands in as a replacement to the original definition's CODE_STR::=(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*
-id_code                               :SYM_ID genericDotNumList;
-at_code                               :SYM_AT genericDotNumList;
-ac_code                               :SYM_AC genericDotNumList;
+id_code                               :SYM_ID (NUM+ (SYM_DOT NUM+)*);
+at_code                               :SYM_AT (NUM+ (SYM_DOT NUM+)*);
+ac_code                               :SYM_AC (NUM+ (SYM_DOT NUM+)*);
 
 
 alphanum_char                         :(LALPHA|UALPHA|SYM_UNDER|NUM);
@@ -43,24 +43,24 @@ identifier                            :(LALPHA|UALPHA) alphanum_char*;
 v_identifier                          :identifier (SYM_DOT identifier)*;
 
 //NOTE: genericDotNumList stands in as a replacement to the original definition "... SYM_ID '1' (SYM_DOT '1')*..."
-v_concept_code                        :SYM_START_SBLOCK SYM_ID genericDotNumList SYM_END_SBLOCK;
+v_concept_code                        :SYM_START_SBLOCK SYM_ID (NUM+ (SYM_DOT NUM+)*) SYM_END_SBLOCK;
 //v_value                               :(LALPHA|UALPHA|NUM|SYM_DOT|SYM_UNDER|SYM_MINUS|SYM_PLUS)+;
-v_dotted_numeric                      :genericDotNumList;
+v_dotted_numeric                      :(NUM+ (SYM_DOT NUM+)*);
 
 //NOTE: In the original definition V_INTEGER::=([0-9]+) | ([0-9]{1,3}(,[0-9]{3})+);
 v_integer                             :NUM+ | (NUM+ (SYM_COMA NUM+)+);
 
+v_real                                :(SYM_PLUS|SYM_MINUS)? NUM* (SYM_DOT NUM+) 
+                                      |(NUM* SYM_DOT NUM+ ('e'|'E') ('+'|'-')?NUM+);
+
 //NOTE: In the original definition -->"...((\.[0-9]+){0,2}((-rc|\+u|\+)[0-9]+)?"
-v_archetype_id                        :(v_identifier SYM_COLON SYM_COLON)? identifier SYM_MINUS identifier SYM_MINUS identifier SYM_DOT identifier (SYM_MINUS identifier)* SYM_DOT 'v' NUM+ (genericDotNum ((SYM_MINUS 'r'|'c'| SYM_PLUS 'u'|SYM_PLUS) NUM+)?)?;
+v_archetype_id                        :(v_identifier SYM_COLON SYM_COLON)? identifier SYM_MINUS identifier SYM_MINUS identifier SYM_DOT identifier (SYM_MINUS identifier)* SYM_DOT 'v' NUM+ ((SYM_DOT NUM+)* ((SYM_MINUS 'r'|'c'| SYM_PLUS 'u'|SYM_PLUS) NUM+)?);
 
 
 //TODO: HIGH, need to clarify the definitions of these
 //V_CADL_TEXT                         : .*?; 
 //V_ODIN_TEXT                         : .*?
 //V_RULES_TEXT                        : .*?;
-
-//v_real                                :(NUM+ SYM_DOT NUM+) | (NUM* SYM_DOT NUM+ ('e'|'E') ('+'|'-')?NUM+);
-
 
 path_seg                               :identifier (SYM_START_SBLOCK (id_code|v_archetype_id) SYM_END_SBLOCK)?;
 
@@ -80,17 +80,15 @@ v_id_code                              :SYM_START_SBLOCK id_code SYM_END_SBLOCK;
 //V_REGEXP                        :SYM_DIV .*? SYM_DIV;
 v_rel_path                             :path_seg v_abs_path; 
 //NOTE: In the original definition, the dotnumlist is a 1(.1)*
-v_root_id_code                         :SYM_START_SBLOCK SYM_ID genericDotNumList SYM_END_SBLOCK;
+v_root_id_code                         :SYM_START_SBLOCK SYM_ID (NUM+ (SYM_DOT NUM+)*) SYM_END_SBLOCK;
 v_slot_filler                          :SYM_START_SBLOCK id_code SYM_COMA v_archetype_id SYM_END_SBLOCK;
 v_string                               :SYM_DBQUOTE ~('\n'|'\\'|SYM_DBQUOTE)* SYM_DBQUOTE;
-//V_TYPE_IDENTIFIER               :([A-Z] IDCHAR*);
-//V_URI                           :[a-z]+ (SYM_COLON SYM_DIV SYM_DIV) [^<>|\\{}^~"\[\] ]*;
-//ORIGINAL DEFINITION
-//V_URI                       :[a-z]+:\/\/[^<>|\\{}^~"\[\] ]*;
-
-//V_VALUE_DEF                     :SYM_START_SBLOCK AT_CODE SYM_END_SBLOCK;
-//V_VALUE_SET_REF_ASSUMED         :SYM_START_SBLOCK AC_CODE [ \t]* SYM_SEMI_COLON [ \t]* AT_CODE SYM_END_SBLOCK;
-//V_VALUE_SET_REF                 :SYM_START_SBLOCK AC_CODE SYM_END_SBLOCK;
+v_type_identifier                      :identifier;
+//NOTE: The definition of v_uri was based entirely on RFC3986 (http://tools.ietf.org/html/rfc3986 page 51)
+v_uri                                  : ((~(':'|'/'|'?'|'#')+) SYM_COLON)? (SYM_DIV SYM_DIV (~(':'|'/'|'?'|'#')*))? (~('?'|'#')*) ('?' ~('#')*)? ('#' .*)?;
+v_value_def                            :SYM_START_SBLOCK at_code SYM_END_SBLOCK;
+v_value_set_ref_assumed                :SYM_START_SBLOCK ac_code SYM_SEMI_COLON at_code SYM_END_SBLOCK;
+v_value_set_ref                        :SYM_START_SBLOCK ac_code SYM_END_SBLOCK;
 
 v_iso8601_duration                     :('P'(NUM+ ('y'|'Y'))? (NUM+ ('m'|'M'))? (NUM+ ('w'|'W'))? (NUM+ ('d'|'D'))? 'T' (NUM+ ('h'|'H'))? (NUM+ ('m'|'M'))? (NUM+ (('.'|',') NUM+)? ('s'|'S'))?) | ('P' (NUM+ ('y'|'Y'))? (NUM+ ('m'|'M'))? (NUM+ ('w'|'W'))? (NUM+ ('d'|'D'))?);
 
@@ -103,16 +101,16 @@ v_iso8601_date_time_constraint_pattern :('y'|'Y') ('y'|'Y') ('y'|'Y') ('y'|'Y') 
 v_iso8601_duration_constraint_pattern  :'P' ('y'|'Y')? ('m'|'M')? ('w'|'W')? ('d'|'D')? ('T' ('h'|'H')? ('m'|'M')? ('s'|'S')?)?; 
 
 //NOTE: In the original definition, some of the NUM+ are actually [0-9]{4} as per https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L441
-v_iso8601_extended_date                :(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM)) 
-                                       |(NUM+ SYM_MINUS ('0'|'1') NUM);
+v_iso8601_extended_date                :(NUM+ SYM_MINUS NUM+ SYM_MINUS NUM+) 
+                                       |(NUM+ SYM_MINUS NUM+);
 
 //NOTE: In the original definition some of the NUM+ are actually further constrained (e.g. {4}) as per https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L424
-v_iso8601_extended_date_time           :(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM) 'T' (('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) (('.'|',') NUM+)? ('Z'|(('+'|'-') NUM+))?)
-                                       |(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM) 'T' (('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) ('Z'|(('+'|'-') NUM+))?)
-                                       |(NUM+ SYM_MINUS (('0'|'1') NUM) SYM_MINUS (('0'|'1'|'2'|'3') NUM) 'T' (('0'|'1'|'2') NUM) ('Z'|(('+'|'-') NUM+))?);
+v_iso8601_extended_date_time           :(NUM+ SYM_MINUS NUM+ SYM_MINUS NUM+ 'T' NUM+ SYM_COLON NUM+ SYM_COLON NUM+ (('.'|',') NUM+)? ('Z'|(('+'|'-') NUM+))?)
+                                       |(NUM+ SYM_MINUS NUM+ SYM_MINUS NUM+ 'T' NUM+ SYM_COLON NUM+ ('Z'|(('+'|'-') NUM+))?)
+                                       |(NUM+ SYM_MINUS NUM+ SYM_MINUS NUM+ 'T' NUM+ ('Z'|(('+'|'-') NUM+))?);
 
-v_iso8601_extended_time                :((('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM) (('.'|',') NUM+)? ('Z'|(('+'|'-') NUM+))?) 
-                                       |((('0'|'1'|'2') NUM) SYM_COLON (('0'|'1'|'2'|'3'|'4'|'5'|'6') NUM)('Z'|(('+'|'-') NUM+))?);
+v_iso8601_extended_time                :(NUM+ SYM_COLON NUM+ SYM_COLON NUM+ (('.'|',') NUM+)? ('Z'|(('+'|'-') NUM+))?) 
+                                       |(NUM+ SYM_COLON NUM+ ('Z'|(('+'|'-') NUM+))?);
 
 //NOTE: This is the final form without taking into account "archetype with a missing 'T'" as specified at https://github.com/openEHR/adl-tools/blob/master/components/adl_compiler/src/syntax/cadl/parser/cadl_15_scanner.l#L472
 v_iso8601_time_constraint_patter       :('h'|'H') ('h'|'H') SYM_COLON ('m'|'M'|'?'|'X') ('m'|'M'|'?'|'X') SYM_COLON ('s'|'S'|'?'|'X') ('s'|'S'|'?'|'X');
