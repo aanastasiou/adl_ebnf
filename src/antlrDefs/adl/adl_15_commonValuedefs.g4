@@ -57,10 +57,10 @@ v_real                                :(SYM_PLUS|SYM_MINUS)? NUM* (SYM_DOT NUM+)
 v_archetype_id                        :(v_identifier SYM_COLON SYM_COLON)? identifier SYM_MINUS identifier SYM_MINUS identifier SYM_DOT identifier (SYM_MINUS identifier)* SYM_DOT 'v' NUM+ ((SYM_DOT NUM+)* ((SYM_MINUS 'r'|'c'| SYM_PLUS 'u'|SYM_PLUS) NUM+)?);
 
 
-//TODO: HIGH, need to clarify the definitions of these
-//V_CADL_TEXT                         : .*?; 
-//V_ODIN_TEXT                         : .*?
-//V_RULES_TEXT                        : .*?;
+//NOTE: Placeholder definitions, will be expanded in due course
+v_cadl_text                           :.*?; //A simple placeholder for cadl content specified in cadl_15_outer.g4
+v_odin_text                           :.*?; //Placeholder for odin content specified in odin_outer.g4;
+v_rules_text                          :.*?; //Placeholder for rules
 
 path_seg                               :identifier (SYM_START_SBLOCK (id_code|v_archetype_id) SYM_END_SBLOCK)?;
 

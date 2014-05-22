@@ -1,17 +1,29 @@
 openEHR ADL 1.5 in EBNF
 =======================
 
-Current progress (Last updated 24/03/2014):
+Current progress (Last updated 22/05/2014):
 
-* Definitions are now available in ANTLR's metalanguage.
-* Please note: The project also includes a definition of AQL in EBNF 
-which was used primarily to generate syntax diagrams for that DSL.
+* Slight backtracking into reviewing the ADL ANTLR definitions. Plain transcription 
+from the eifer yacc resources resulted in complex rule clashes. For this reason, each
+rule definition within [adl_15_commonValuedefs.g4](https://github.com/aanastasiou/adl_ebnf/blob/master/src/antlrDefs/adl/adl_15_commonValuedefs.g4) 
+was reviewed and modified so that it gets parsed properly by ANTLR.
+
+* The reviewing criteria were: Tokens should be unique in their definitions, rules
+should be composed of tokens, rules should be as less overlapping as it is possible 
+in their definitions, rules cannot contain structural constraints (e.g. `[0-9]{0-3}`)
+and these should be taken care of at the semantic parsing level. 
+
+* These simple guidelines lead to the revision of a few rules that were re-used in 
+different places (v_identifier, v_dotted_numeric, v_value).
+
+* Please note: The project also includes [a definition of AQL in EBNF](https://github.com/aanastasiou/adl_ebnf/tree/master/src/aql_ebnf) 
+which was used primarily to generate [syntax diagrams for that DSL previously](http://lists.openehr.org/pipermail/openehr-technical_lists.openehr.org/2013-July/007876.html).
 
 
 
 Background
 ----------
-The openEHR foundation (openehr.org) is producing a set of 
+The [openEHR foundation](http://www.openehr.org) is producing a set of 
 specifications towards defining an end-to-end platform that enables a 
 meaningful and helpful integration of information communication 
 technolologies with the healthcare domain.
@@ -20,15 +32,15 @@ The current set of specifications includes the openEHR data model, the
 Archetype Definition Language (ADL) and the Archetype Querying Language
 (AQL).
 
-The ADL and AQL are context-free domain specific languages whose sole 
-purpose is to describe the structure and content of data model entities
+The ADL and AQL are context-free domain specific languages whose purpose 
+is to describe the structure and content of data model entities
 and also query these structures.
 
 The structure of context-free domain specific languages such as ADL 
 and AQL can be described through a standardised notation called 
-(Extended) Backus Naur Form (E?BNF).
+(Extended) Backus Naur Form (E?BNF one could say).
 
-An E?BNF description of a language is a very useful resource because it
+An EBNF description of a language is a very useful resource because it
 enables:
 
 *) The development of software to parse ADL files and
@@ -80,14 +92,8 @@ What is the current status and where do i go from here?
 -------------------------------------------------------
 This is still work in progress with the following rough TODO list:
 
-*) The definitions are already complex enough and several shortcuts have
-been used to make strings shorter. These shortcuts come in the form of
-generic lambda functions.
+*) Certain classes need careful revision of their definitions. This seems
+to be an ongoing effort but at the moment the focus is to express the regex
+parsing rule using modes to be able to report problems with their parsing.
 
-*) Certain classes need careful revision of their definitions, these are
-(regex, quotedString, uri, real)
-
-*) Even at the level of EBNF it is possible to perform some
-optimisations. However at this point it is best to express everything
-as simply as possible to first conclude with clear definitions for all
-classes.
+*) ODIN is very early in its development...and very complex.

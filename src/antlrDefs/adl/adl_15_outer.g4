@@ -48,36 +48,36 @@ transitional_archetype              :SYM_ARCHETYPE arch_meta_data archetype_id a
                             
 transitional_specialised_archetype  :SYM_ARCHETYPE arch_meta_data archetype_id arch_specialisation arch_concept arch_language arch_description arch_definition arch_rules arch_terminology arch_annotations;
                                        
-arch_concept                        :SYM_CONCEPT V_CONCEPT_CODE | SYM_CONCEPT;
+arch_concept                        :SYM_CONCEPT v_concept_code | SYM_CONCEPT;
 
 arch_meta_data                      :|(SYM_START_PBLOCK arch_meta_data_items SYM_END_PBLOCK);
 
 arch_meta_data_items                :arch_meta_data_item (SYM_SEMI_COLON arch_meta_data_item)*;
 
-arch_meta_data_item                 :(SYM_ADL_VERSION SYM_EQ V_DOTTED_NUMERIC) 
-                                    |(SYM_UID SYM_EQ V_DOTTED_NUMERIC)
+arch_meta_data_item                 :(SYM_ADL_VERSION SYM_EQ v_dotted_numeric) 
+                                    |(SYM_UID SYM_EQ v_dotted_numeric)
                                     |(SYM_UID SYM_EQ V_VALUE)
                                     |SYM_IS_CONTROLLED
                                     |SYM_IS_GENERATED
-                                    |(V_IDENTIFIER SYM_EQ V_IDENTIFIER)
-                                    |(V_IDENTIFIER SYM_EQ V_VALUE)
-                                    |V_IDENTIFIER
+                                    |(v_identifier SYM_EQ v_identifier)
+                                    |(v_identifier SYM_EQ V_VALUE)
+                                    |v_identifier
                                     |V_VALUE;
 
-arch_specialisation                 :SYM_SPECIALIZE V_ARCHETYPE_ID;
+arch_specialisation                 :SYM_SPECIALIZE v_archetype_id;
 
-arch_language                       :SYM_LANGUAGE V_ODIN_TEXT;
+arch_language                       :SYM_LANGUAGE v_odin_text;
 
-arch_description                    :SYM_DESCRIPTION V_ODIN_TEXT;
+arch_description                    :SYM_DESCRIPTION v_odin_text;
 
-arch_definition                     :SYM_DEFINITION V_CADL_TEXT;
+arch_definition                     :SYM_DEFINITION v_cadl_text;
 
-arch_rules                          :|(SYM_RULES V_RULES_TEXT);
-arch_terminology                    :SYM_TERMINOLOGY V_ODIN_TEXT;
-arch_annotations                    :|(SYM_ANNOTATIONS V_ODIN_TEXT);
-arch_component_terminologies        :SYM_COMPONENT_TERMINOLOGIES V_ODIN_TEXT;
+arch_rules                          :|(SYM_RULES v_rules_text);
+arch_terminology                    :SYM_TERMINOLOGY v_odin_text;
+arch_annotations                    :|(SYM_ANNOTATIONS v_odin_text);
+arch_component_terminologies        :SYM_COMPONENT_TERMINOLOGIES v_odin_text;
 
-archetype_id                        :V_ARCHETYPE_ID;
+archetype_id                        :v_archetype_id;
 
 //NOTE: Skipping whitespace is left as a rule in each file in case whitespace
 //gets to be treated differently depending on file type.
